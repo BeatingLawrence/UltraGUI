@@ -54,8 +54,6 @@
  *      Not-rounded (square):
  *          In this mode, corners are square and anti-aliasing is disabled.
  *          This is the default mode, if no edge radius has been set.
- *
- *
  */
 
 #include <QPushButton>

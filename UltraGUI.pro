@@ -20,6 +20,7 @@ DEFINES += VERSION_MAJ=\"\\\"$${VER_MAJ}\\\"\" \
 
 SOURCES += \
     components/ultrabarsgraph.cpp \
+    components/ultragui.cpp \
     components/ultralinesgraph.cpp \
     components/ultraloadingbar.cpp \
     components/ultraloadingcircle.cpp \

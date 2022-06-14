@@ -3,6 +3,7 @@
 #include <QPainterPath>
 #include <QMouseEvent>
 #include <QWheelEvent>
+#include <math.h>
 
 using namespace hci;
 
