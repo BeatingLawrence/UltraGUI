@@ -6,17 +6,27 @@
 
 namespace hci
 {
-
     class ULTRAGUI_EXPORT UltraBarsGraph : public QWidget
     {
             Q_OBJECT
+        private:
+            QList<int32_t> m_graph;
+
+            virtual void paintEvent(QPaintEvent* event) override;
+
         public:
             explicit UltraBarsGraph(QWidget* parent = nullptr);
 
-        signals:
+            void setTopValue(int32_t);
+
+            void setBottomValue(int32_t);
+
+            void setValueNumber(size_t);
+
+        public slots:
+            void pushValue(int32_t);
 
     };
-
-} // namespace hci
+}
 
 #endif // HCI_ULTRABARSGRAPH_H
