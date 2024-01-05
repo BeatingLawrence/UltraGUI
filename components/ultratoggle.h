@@ -3,60 +3,58 @@
 
 #include <QPushButton>
 #include <QTimer>
+
 #include "./UltraGUI_global.h"
 
 namespace hci
 {
     class ULTRAGUI_EXPORT UltraToggle : public QPushButton
     {
-            Q_OBJECT
+        Q_OBJECT
 
-        private:
-            bool m_state;
+       private:
+        bool m_state;
 
-            bool m_hovering;
+        bool m_hovering;
 
-            unsigned int m_slideAnimation;
+        unsigned int m_slideAnimation;
 
-            QTimer m_timer;
+        QTimer m_timer;
 
-            QColor _computeTransient(const QColor& first, const QColor& second, uint8_t selector);
+        QColor _computeTransient(const QColor& first, const QColor& second, uint8_t selector);
 
-        private slots:
-            void _mouseClicked();
+       private slots:
+        void _mouseClicked();
 
-            void _onTimerTick();
+        void _onTimerTick();
 
-        protected:
-            virtual void paintEvent(QPaintEvent* event) override;
+       protected:
+        virtual void paintEvent(QPaintEvent* event) override;
 
-            virtual void enterEvent(QEvent* event) override;
+        virtual void enterEvent(QEnterEvent* event) override;
 
-            virtual void leaveEvent(QEvent* event) override;
+        virtual void leaveEvent(QEvent* event) override;
 
-            virtual void hideEvent(QHideEvent* event) override;
+        virtual void hideEvent(QHideEvent* event) override;
 
-        public:
-            UltraToggle(QWidget* parent = nullptr);
+       public:
+        UltraToggle(QWidget* parent = nullptr);
 
-            virtual ~UltraToggle();
+        virtual ~UltraToggle();
 
-            inline bool getState() const
-            {
-                return m_state;
-            }
+        inline bool getState() const { return m_state; }
 
-        public slots:
+       public slots:
 
-            void setState(bool state, bool useAnimation = true);
+        void setState(bool state, bool useAnimation = true);
 
-        signals:
-            void onEnable();
+       signals:
+        void onEnable();
 
-            void onDisable();
+        void onDisable();
 
-            void onChange(bool newState);
+        void onChange(bool newState);
     };
-}
+}  // namespace hci
 
-#endif // HCI_ULTRATOGGLE_H
+#endif  // HCI_ULTRATOGGLE_H

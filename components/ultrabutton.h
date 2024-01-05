@@ -56,269 +56,170 @@
  *          This is the default mode, if no edge radius has been set.
  */
 
-#include <QPushButton>
-#include <QPixmap>
-#include <QTimer>
 #include <QPainterPath>
+#include <QPixmap>
+#include <QPushButton>
+#include <QTimer>
+
 #include "./UltraGUI_global.h"
 
 namespace hci
 {
     class ULTRAGUI_EXPORT UltraButton : public QPushButton
     {
-            Q_OBJECT
+        Q_OBJECT
 
-        public:
+       public:
+        enum AnimationSpeed
+        {
+            AS_Slow,
+            AS_Normal,
+            AS_Fast,
+            AS_Superfast
+        };
 
-            enum ButtonPosition
-            {
-                BP_First,
-                BP_Mid,
-                BP_Last
-            };
+       private:
+        bool m_ledState, m_buttonState, m_toggleMode, m_synchronous, m_hovering, m_leftJustify;
+        bool m_iconLeftJustify, m_shrinkToFit, m_useHoveringAnimation, m_blinking, m_adaptIconsColor;
+        bool m_hasBorder, m_geometryRequired, m_touchScreenMode;
+        QString m_activeText;
+        uint8_t m_leftPadding, m_iconLeftPadding, m_shrinkPadding, m_hoveringAnimation, m_animationToSum;
 
-            enum BarOrientation
-            {
-                BO_Horizontal,
-                BO_Vertical,
-                BO_Disabled
-            };
+        QPixmap m_defaultIcon;
 
-            enum AnimationSpeed
-            {
-                AS_Slow,
-                AS_Normal,
-                AS_Fast,
-                AS_Superfast
-            };
+        QPixmap m_activeIcon;
 
-        private:
-            bool m_ledState;
-            bool m_buttonState;
-            bool m_toggleMode;
-            bool m_synchronous;
-            bool m_hovering;
-            bool m_leftJustify;
-            bool m_iconLeftJustify;
-            bool m_shrinkToFit;
-            bool m_useHoveringAnimation;
-            bool m_blinking;
-            bool m_adaptIconsColor;
-            bool m_drawBoundaryLine;
-            bool m_geometryRequired;
-            bool m_touchScreenMode;
-            QString m_activeText;
-            uint8_t m_edgeRadius;
-            uint8_t m_leftPadding;
-            uint8_t m_iconLeftPadding;
-            uint8_t m_shrinkPadding;
-            uint8_t m_hoveringAnimation;
-            uint8_t m_animationToSum;
-            ButtonPosition m_position;
-            BarOrientation m_orientation;
-            void* m_data;
+        QTimer m_timer;
 
-            QPixmap m_defaultIcon;
+        //=====================geometry
+        QPainterPath m_frame;
+        QRect m_inputRect;
+        //=============================
 
-            QPixmap m_activeIcon;
+        QColor _computeTransient(const QColor& first, const QColor& second, uint8_t selector);
 
-            QTimer m_timer;
+        void _writeString(QPainter& painter, const QString& string, const QColor& color);
 
-            //=====================geometry
-            QPainterPath m_completeFrame;
-            QVector<QPainterPath> m_pathsToDraw;
-            //=============================
+        void _configureTiming(AnimationSpeed speed);
 
-            QColor _computeTransient(const QColor& first, const QColor& second, uint8_t selector);
+        void _sum(uint8_t& value, uint8_t toSum, uint8_t max, bool subtract = false);
 
-            void _writeString(QPainter& painter, const QString& string, const QColor& color);
+        void _adaptIconsColor();
 
-            void _configureTiming(AnimationSpeed speed);
+        void _computeGeometry();
 
-            void _sum(uint8_t& value, uint8_t toSum, uint8_t max, bool subtract = false);
+        void cursorEntered();
 
-            void _adaptIconsColor();
+        void cursorLeft();
 
-            void _draw(QPainter& painter, const QVector<QPainterPath> paths);
+        void changeTo(bool newState);
 
-            void _computeGeometry();
+       private slots:
+        void _tick();
 
-            bool _isCurve(const QPainterPath& path);
+       public:
+        explicit UltraButton(QWidget* parent = nullptr);
 
-        private slots:
-            void _mousePressed();
+        virtual ~UltraButton();
 
-            void _mouseReleased();
+        // sets icons
+        void setIcons(const QPixmap& defaultIcon, const QPixmap& activeIcon = QPixmap(), bool colorAdapting = true);
 
-            void _mouseClicked();
+        // gets button state
+        inline bool isButtonActive() const { return m_buttonState; }
 
-            void _tick();
+        // gets LED state
+        inline bool isLedActive() const { return m_ledState; }
 
-        public:
-            explicit UltraButton(QWidget* parent = nullptr);
+        // sets if the button is a toggle
+        inline void setToggleMode(bool toggleMode) { m_toggleMode = toggleMode; }
 
-            virtual ~UltraButton();
+        // sets wether LED state must stay in sync with button state
+        inline void setSync(bool sync = true) { m_synchronous = sync; }
 
-            //sets icons
-            void setIcons(const QPixmap& defaultIcon, const QPixmap& activeIcon = QPixmap(), bool colorAdapting = true);
+        // sets text displayed while led is active
+        inline void setActiveText(const QString& string) { m_activeText = string; }
 
-            //gets button state
-            inline bool isButtonActive() const
-            {
-                return m_buttonState;
-            }
+        // sets whether draw border or not
+        inline void drawBorder(bool drawBorder = true) { m_hasBorder = drawBorder; }
 
-            //gets LED state
-            inline bool isLedActive() const
-            {
-                return m_ledState;
-            }
+        // sets left-justify of icon
+        inline void iconLeftJustify(bool leftJustify = true) { m_iconLeftJustify = leftJustify; }
 
-            //sets if the button is a toggle
-            inline void setToggleMode(bool toggleMode)
-            {
-                m_toggleMode = toggleMode;
-            }
+        // sets left padding of icon
+        inline void setIconLeftPadding(uint8_t padding) { m_iconLeftPadding = padding; }
 
-            //sets wether LED state must stay in sync with button state
-            inline void setSync(bool sync = true)
-            {
-                m_synchronous = sync;
-            }
+        // use adaptive colors for the icon
+        inline void setIconColorAdapting(bool state = true) { m_adaptIconsColor = state; }
 
-            //sets text displayed while led is active
-            inline void setActiveText(const QString& string)
-            {
-                m_activeText = string;
-            }
+        // sets the touch screen mode state
+        inline void setTouchScreenMode(bool state = true)
+        {
+            m_touchScreenMode = state;
+            setMouseTracking(!state);
+            m_hovering          = false;
+            m_hoveringAnimation = 0;
+            m_timer.stop();
+        }
 
-            //sets whether draw border or not
-            inline void drawBorder(bool drawBorder = true)
-            {
-                m_drawBoundaryLine = drawBorder;
-            }
+        // sets text left-justify
+        inline void leftJustify(bool leftJustify = true) { m_leftJustify = leftJustify; }
 
-            //sets rounding radius of the edges
-            inline void setEdgeRadius(uint8_t radius)
-            {
-                m_edgeRadius = radius;
-                m_geometryRequired = true;
-            }
+        // sets a left padding (valid with left-justify enabled)
+        inline void setLeftPadding(uint8_t padding) { m_leftPadding = padding; }
 
-            //sets left-justify of icon
-            inline void iconLeftJustify(bool leftJustify = true)
-            {
-                m_iconLeftJustify = leftJustify;
-            }
+        // sets wether the component must tune its width based on text width
+        inline void shrinkToFIt(bool shrinkToFit = true) { m_shrinkToFit = shrinkToFit; }
 
-            //sets left padding of icon
-            inline void setIconLeftPadding(uint8_t padding)
-            {
-                m_iconLeftPadding = padding;
-            }
+        // sets an offset to sum to shrink to fit calculations (left + right)
+        inline void shrinkToFitPadding(uint8_t padding) { m_shrinkPadding = padding; }
 
-            //use adaptive colors for the icon
-            inline void setIconColorAdapting(bool state = true)
-            {
-                m_adaptIconsColor = state;
-            }
+        // sets wether use animation while passing from non-hovering to hovering state and vice versa
+        void animateHovering(bool animate = true, const AnimationSpeed& speed = UltraButton::AS_Normal);
 
-            //sets the touch screen mode state
-            inline void setTouchScreenMode(bool state = true)
-            {
-                m_touchScreenMode = state;
-                setMouseTracking(!state);
-                m_hovering = false;
-                m_hoveringAnimation = 0;
-                m_timer.stop();
-            }
+       protected:
+        virtual void paintEvent(QPaintEvent* event) override;
 
-            //inline-containment setup. Set first argument to BarOrientation::BO_Disabled to disable inline-containment
-            inline void useInLineContainment(const BarOrientation orientation = BarOrientation::BO_Disabled,
-                                             const ButtonPosition position = ButtonPosition::BP_Mid)
-            {
-                m_orientation = orientation;
-                m_position = position;
-                m_geometryRequired = true;
-            }
+        virtual void additionalPainting(QPainter& painter);
 
-            //sets text left-justify
-            inline void leftJustify(bool leftJustify = true)
-            {
-                m_leftJustify = leftJustify;
-            }
+        virtual void hideEvent(QHideEvent* event) override;
 
-            //sets a left padding (valid with left-justify enabled)
-            inline void setLeftPadding(uint8_t padding)
-            {
-                m_leftPadding = padding;
-            }
+        virtual void changeEvent(QEvent* event) override;
 
-            //sets wether the component must tune its width based on text width
-            inline void shrinkToFIt(bool shrinkToFit = true)
-            {
-                m_shrinkToFit = shrinkToFit;
-            }
+        virtual void resizeEvent(QResizeEvent* event) override;
 
-            //sets an offset to sum to shrink to fit calculations (left + right)
-            inline void shrinkToFitPadding(uint8_t padding)
-            {
-                m_shrinkPadding = padding;
-            }
+        virtual void mousePressEvent(QMouseEvent* event) override;
 
-            //sets wether use animation while passing from non-hovering to hovering state and vice versa
-            void animateHovering(bool animate = true, const AnimationSpeed& speed = UltraButton::AS_Normal);
+        virtual void mouseReleaseEvent(QMouseEvent* event) override;
 
-            //saves a void pointer
-            inline void setData(void* data)
-            {
-                m_data = data;
-            }
+        virtual void mouseMoveEvent(QMouseEvent* event) override;
 
-            //returns the saved void pointer
-            inline void* getData()
-            {
-                return m_data;
-            }
+        virtual void leaveEvent(QEvent* event) override;
 
-        protected:
-            virtual void paintEvent(QPaintEvent* event) override;
+       signals:
+        // Emitted when button is activated
+        void onEnable();
 
-            virtual void enterEvent(QEvent* event) override;
+        // Emitted when button is deactivated
+        void onDisable();
 
-            virtual void leaveEvent(QEvent* event) override;
+        // Emitted when button state changes.
+        // The bool parameter contains the NEW state
+        void onChange(bool);
 
-            virtual void additionalPainting(QPainter& painter);
+        // Emitted when the button is clicked
+        void onClick();
 
-            virtual void hideEvent(QHideEvent* event) override;
+       public slots:
+        void blink();
 
-            virtual void changeEvent(QEvent* event) override;
+        // Set led state
+        void activate(bool active = true);
 
-            virtual void resizeEvent(QResizeEvent* event) override;
-
-        signals:
-            //emitted when button is activated
-            void onEnable(void*);
-
-            //emitted when button is deactivated
-            void onDisable(void*);
-
-            //emitted when button state changes
-            void onChange(bool);
-
-            //emitted when click happens. Check pointer before use it
-            void onClick(void*);
-
-        public slots:
-            void blink();
-
-            //sets led state
-            void activate(bool active = true);
-
-            //switches off led
-            void deactivate();
+        // Switch off led
+        void deactivate();
     };
 
-}
+}  // namespace hci
 
-#endif // BUTTON_H
+#endif  // BUTTON_H

@@ -12,28 +12,26 @@ QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
 {
-        Q_OBJECT
+    Q_OBJECT
 
-    private:
-        Ui::MainWindow* ui;
+   private:
+    Ui::MainWindow* ui;
 
-    private slots:
-        void setDarkTheme(bool dt);
+   private slots:
+    void setDarkTheme(bool dt);
 
-        void _sliderChange(uint32_t value);
+    void _sliderChange(uint32_t value);
 
-        void simpleButtonClicked();
-        void verticalUB1Clicked();
-        void verticalUB2Clicked();
-        void verticalUB3Clicked();
-        void horizontalUB1Clicked();
-        void horizontalUB2Clicked();
-        void horizontalUB3Clicked();
+    void testButtonClicked();
+    void testButtonEnabled();
+    void testButtonDisabled();
 
-    public:
-        MainWindow(QWidget* parent = nullptr);
+    void buttonTestToggleCBChange(int);
+    void buttonTestTouchCBChange(int);
 
-        ~MainWindow();
+   public:
+    MainWindow(QWidget* parent = nullptr);
 
+    ~MainWindow();
 };
-#endif // MAINWINDOW_H
+#endif  // MAINWINDOW_H

@@ -189,110 +189,43 @@
            <item>
             <widget class="QWidget" name="widget_5" native="true">
              <layout class="QHBoxLayout" name="horizontalLayout_5">
+              <property name="spacing">
+               <number>10</number>
+              </property>
+              <property name="leftMargin">
+               <number>2</number>
+              </property>
+              <property name="topMargin">
+               <number>2</number>
+              </property>
+              <property name="rightMargin">
+               <number>2</number>
+              </property>
+              <property name="bottomMargin">
+               <number>2</number>
+              </property>
               <item>
-               <widget class="QWidget" name="widget_2" native="true">
-                <layout class="QVBoxLayout" name="verticalLayout_4">
+               <widget class="hci::UltraButton" name="testPB">
+                <property name="text">
+                 <string>Button</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QWidget" name="widget_6" native="true">
+                <layout class="QVBoxLayout" name="verticalLayout_3">
                  <item>
-                  <widget class="hci::UltraButton" name="simplePushButton">
+                  <widget class="QCheckBox" name="buttonTestToggleCB">
                    <property name="text">
-                    <string>Simple</string>
+                    <string>Toggle</string>
                    </property>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QWidget" name="verticalStackOfUB" native="true">
-                   <property name="maximumSize">
-                    <size>
-                     <width>16777215</width>
-                     <height>16777215</height>
-                    </size>
+                  <widget class="QCheckBox" name="buttonTestTouchCB">
+                   <property name="text">
+                    <string>Touch-screen</string>
                    </property>
-                   <layout class="QVBoxLayout" name="verticalLayout_3">
-                    <property name="spacing">
-                     <number>0</number>
-                    </property>
-                    <property name="leftMargin">
-                     <number>0</number>
-                    </property>
-                    <property name="topMargin">
-                     <number>0</number>
-                    </property>
-                    <property name="rightMargin">
-                     <number>0</number>
-                    </property>
-                    <property name="bottomMargin">
-                     <number>0</number>
-                    </property>
-                    <item>
-                     <widget class="hci::UltraButton" name="verticalStackUB_1">
-                      <property name="text">
-                       <string>First</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="hci::UltraButton" name="verticalStackUB_2">
-                      <property name="text">
-                       <string>Mid</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="hci::UltraButton" name="verticalStackUB_3">
-                      <property name="text">
-                       <string>Last</string>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QWidget" name="horizontalStackOfUB" native="true">
-                   <property name="maximumSize">
-                    <size>
-                     <width>16777215</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                   <layout class="QHBoxLayout" name="horizontalLayout_3">
-                    <property name="spacing">
-                     <number>0</number>
-                    </property>
-                    <property name="leftMargin">
-                     <number>0</number>
-                    </property>
-                    <property name="topMargin">
-                     <number>0</number>
-                    </property>
-                    <property name="rightMargin">
-                     <number>0</number>
-                    </property>
-                    <property name="bottomMargin">
-                     <number>0</number>
-                    </property>
-                    <item>
-                     <widget class="hci::UltraButton" name="horizontalStackUB_1">
-                      <property name="text">
-                       <string>First</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="hci::UltraButton" name="horizontalStackUB_2">
-                      <property name="text">
-                       <string>Mid</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="hci::UltraButton" name="horizontalStackUB_3">
-                      <property name="text">
-                       <string>Last</string>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
                   </widget>
                  </item>
                 </layout>
@@ -521,11 +454,6 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>hci::UltraButton</class>
-   <extends>QPushButton</extends>
-   <header>components/ultrabutton.h</header>
-  </customwidget>
-  <customwidget>
    <class>hci::UltraToggle</class>
    <extends>QWidget</extends>
    <header>components/ultratoggle.h</header>
@@ -560,6 +488,11 @@
    <extends>QWidget</extends>
    <header>components/ultrascroll.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>hci::UltraButton</class>
+   <extends>QPushButton</extends>
+   <header>components/ultrabutton.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

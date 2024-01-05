@@ -5,7 +5,7 @@ VER_MIN = 9
 VER_PAT = 1
 VER_SUF = "-beta"
 
-#---------------------------------------------------------------------
+#--------------------------------------------------------------------- TODO CONVERT TO CMAKE
 
 QT += widgets
 CONFIG += c++11
@@ -19,7 +19,6 @@ DEFINES += VERSION_MAJ=\"\\\"$${VER_MAJ}\\\"\" \
            VERSION_STR=\"\\\"$${VER_STR}\\\"\"
 
 SOURCES += \
-    components/ultrabarsgraph.cpp \
     components/ultragui.cpp \
     components/ultralinesgraph.cpp \
     components/ultraloadingbar.cpp \
@@ -36,7 +35,6 @@ SOURCES += \
 
 HEADERS += \
     components/UltraGUI_global.h \
-    components/ultrabarsgraph.h \
     components/ultralinesgraph.h \
     components/ultraloadingbar.h \
     components/ultraloadingcircle.h \
