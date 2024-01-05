@@ -35,6 +35,14 @@ namespace gui
 
     static const int32_t ULTRAGUI_EXPORT InvalidID = -1;
 
+    enum AnimationSpeed
+    {
+        AS_Slow,
+        AS_Normal,
+        AS_Fast,
+        AS_Superfast
+    };
+
 }  // namespace gui
 
 #endif  // TYPES_H

@@ -25,17 +25,19 @@ UltraButton::UltraButton(QWidget* parent)
       m_hasBorder(false),
       m_geometryRequired(true),
       m_touchScreenMode(false),
+      m_pressed(false),
       m_activeText(""),
       m_leftPadding(5),
       m_iconLeftPadding(1),
       m_shrinkPadding(0),
       m_hoveringAnimation(0),
       m_animationToSum(0),
+      m_radius(0),
       m_defaultIcon(),
       m_activeIcon(),
       m_timer(this)
 {
-    _configureTiming(UltraButton::AS_Normal);
+    _configureTiming(AS_Normal);
 
     // TODO: add macro that set mouse tracking to off if the system is MACOS
     setMouseTracking(!m_touchScreenMode);
@@ -60,6 +62,7 @@ void UltraButton::paintEvent(QPaintEvent* event)
     {
         int widthOfText = painter.fontMetrics().horizontalAdvance(text());
         setFixedWidth(widthOfText + m_shrinkPadding);
+        // TODO make the text dimension adapting to the button size and not vice versa
     }
 
     //=====================================================COLOR
@@ -75,7 +78,7 @@ void UltraButton::paintEvent(QPaintEvent* event)
     if (m_hasBorder)
         painter.setPen(QPen(QBrush(palette().color(QPalette::ButtonText)), 1, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin));
     else
-        painter.setPen(QPen());
+        painter.setPen(QPen(Qt::NoPen));
 
     painter.setBrush(QBrush(fillColor));
     painter.drawPath(m_frame);
@@ -174,6 +177,7 @@ void UltraButton::mousePressEvent(QMouseEvent* event)
     }
 
     update();
+    m_pressed = true;
     QPushButton::mousePressEvent(event);
 }
 //=========================================================
@@ -181,43 +185,23 @@ void UltraButton::mouseReleaseEvent(QMouseEvent* event)
 {
     if (!m_toggleMode)
     {
-        changeTo(false);
+        if (m_pressed) changeTo(false);
     }
     else
     {
         if (m_touchScreenMode)
         {
             m_hoveringAnimation = 0;
-            changeTo(!m_buttonState);
+            if (m_pressed) changeTo(!m_buttonState);
         }
         else if (m_hovering)
-            changeTo(!m_buttonState);
+            if (m_pressed) changeTo(!m_buttonState);
     }
 
     update();
+    m_pressed = false;
 
     QPushButton::mouseReleaseEvent(event);
-}
-//=========================================================
-void UltraButton::mouseMoveEvent(QMouseEvent* event)
-{
-    bool hit = false;
-    // if (underMouse()) hit = hitButton(event->position().toPoint());
-
-    if (underMouse()) hit = m_inputRect.contains(event->position().toPoint());
-
-    if (hit != m_hovering)
-    {
-        if (hit)
-            cursorEntered();
-        else
-            cursorLeft();
-
-        update();
-        m_hovering = hit;
-    }
-
-    QPushButton::mouseMoveEvent(event);
 }
 //=========================================================
 void UltraButton::leaveEvent(QEvent* event)
@@ -226,8 +210,25 @@ void UltraButton::leaveEvent(QEvent* event)
     QPushButton::leaveEvent(event);
 }
 //=========================================================
+void UltraButton::enterEvent(QEnterEvent* event)
+{
+    cursorEntered();
+    QPushButton::enterEvent(event);
+}
+//=========================================================
+void UltraButton::mouseMoveEvent(QMouseEvent* event)
+{
+    QPushButton::mouseMoveEvent(event);
+
+    bool hit = false;
+    if (underMouse()) hit = hitButton(event->position().toPoint());
+
+    if (!hit && m_hovering && m_pressed) cursorLeft();
+}
+//=========================================================
 void UltraButton::cursorEntered()
 {
+    m_hovering = true;
     if (!m_touchScreenMode)
     {
         m_blinking = false;
@@ -241,6 +242,8 @@ void UltraButton::cursorEntered()
 //=========================================================
 void UltraButton::cursorLeft()
 {
+    m_hovering = false;
+    m_pressed  = false;
     if (m_touchScreenMode || !m_useHoveringAnimation)
         m_hoveringAnimation = 0;
     else
@@ -316,22 +319,22 @@ void UltraButton::_configureTiming(AnimationSpeed speed)
 {
     switch (speed)
     {
-        case UltraButton::AS_Slow:
+        case AS_Slow:
             m_timer.setInterval(10);
             m_animationToSum = 5;
             break;
 
-        case UltraButton::AS_Normal:
+        case AS_Normal:
             m_timer.setInterval(5);
             m_animationToSum = 5;
             break;
 
-        case UltraButton::AS_Fast:
+        case AS_Fast:
             m_timer.setInterval(5);
             m_animationToSum = 10;
             break;
 
-        case UltraButton::AS_Superfast:
+        case AS_Superfast:
             m_timer.setInterval(5);
             m_animationToSum = 12;
             break;
@@ -402,12 +405,15 @@ void UltraButton::_adaptIconsColor()
 //=========================================================
 void UltraButton::_computeGeometry()
 {
-    auto r = rect();
     m_frame.clear();
-    m_frame.addRect(r);
-    int vMargins       = r.height() / 10;
-    int hMargins       = r.width() / 10;
-    m_inputRect        = r.marginsRemoved({hMargins, vMargins, hMargins, vMargins});
+    QRect r = rect();
+    r.adjust(1, 1, -1, -1);
+
+    if (m_radius)
+        m_frame.addRoundedRect(r, m_radius, m_radius);
+    else
+        m_frame.addRect(r);
+
     m_geometryRequired = false;
 }
 //=========================================================
@@ -460,7 +466,7 @@ void UltraButton::activate(bool active)
 //=========================================================
 void UltraButton::deactivate() { activate(false); }
 //=========================================================
-void UltraButton::animateHovering(bool animate, const AnimationSpeed& speed)
+void UltraButton::animateHovering(bool animate, AnimationSpeed speed)
 {
     m_useHoveringAnimation = animate;
     _configureTiming(speed);

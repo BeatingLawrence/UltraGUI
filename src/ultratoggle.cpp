@@ -17,7 +17,6 @@ UltraToggle::UltraToggle(QWidget* parent)
 {
     setMouseTracking(true);
     m_timer.setInterval(20);
-    connect(this, SIGNAL(clicked()), this, SLOT(_mouseClicked()));
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(_onTimerTick()));
 }
 //=========================================================
@@ -133,6 +132,12 @@ void UltraToggle::hideEvent(QHideEvent* event)
     m_hovering       = false;
     m_slideAnimation = m_state ? (width() - height()) : 0;
     m_timer.stop();
+}
+//=========================================================
+void UltraToggle::mousePressEvent(QMouseEvent* event)
+{
+    _mouseClicked();
+    QPushButton::mousePressEvent(event);
 }
 //=========================================================
 void UltraToggle::setState(bool state, bool useAnimation)

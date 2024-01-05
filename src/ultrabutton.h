@@ -45,15 +45,6 @@
  *
  *      -QPalette::Midlight
  *          Used for the hovering color
- *
- *  Border can be:
- *      Rounded:
- *          In this mode, corners are rounded and anti-aliasing is enabled.
- *          To activate this, the application must set an edge radius.
- *
- *      Not-rounded (square):
- *          In this mode, corners are square and anti-aliasing is disabled.
- *          This is the default mode, if no edge radius has been set.
  */
 
 #include <QPainterPath>
@@ -62,6 +53,7 @@
 #include <QTimer>
 
 #include "./UltraGUI_global.h"
+#include "types.h"
 
 namespace gui
 {
@@ -69,31 +61,19 @@ namespace gui
     {
         Q_OBJECT
 
-       public:
-        enum AnimationSpeed
-        {
-            AS_Slow,
-            AS_Normal,
-            AS_Fast,
-            AS_Superfast
-        };
-
        private:
         bool m_ledState, m_buttonState, m_toggleMode, m_synchronous, m_hovering, m_leftJustify;
         bool m_iconLeftJustify, m_shrinkToFit, m_useHoveringAnimation, m_blinking, m_adaptIconsColor;
-        bool m_hasBorder, m_geometryRequired, m_touchScreenMode;
+        bool m_hasBorder, m_geometryRequired, m_touchScreenMode, m_pressed;
         QString m_activeText;
-        uint8_t m_leftPadding, m_iconLeftPadding, m_shrinkPadding, m_hoveringAnimation, m_animationToSum;
+        uint8_t m_leftPadding, m_iconLeftPadding, m_shrinkPadding, m_hoveringAnimation, m_animationToSum, m_radius;
 
-        QPixmap m_defaultIcon;
-
-        QPixmap m_activeIcon;
+        QPixmap m_defaultIcon, m_activeIcon;
 
         QTimer m_timer;
 
         //=====================geometry
         QPainterPath m_frame;
-        QRect m_inputRect;
         //=============================
 
         QColor _computeTransient(const QColor& first, const QColor& second, uint8_t selector);
@@ -122,37 +102,40 @@ namespace gui
 
         virtual ~UltraButton();
 
-        // sets icons
+        // set icons
         void setIcons(const QPixmap& defaultIcon, const QPixmap& activeIcon = QPixmap(), bool colorAdapting = true);
 
-        // gets button state
+        // get button state
         inline bool isButtonActive() const { return m_buttonState; }
 
-        // gets LED state
+        // get LED state
         inline bool isLedActive() const { return m_ledState; }
 
-        // sets if the button is a toggle
+        // set if the button is a toggle
         inline void setToggleMode(bool toggleMode) { m_toggleMode = toggleMode; }
 
-        // sets wether LED state must stay in sync with button state
+        // set wether LED state must stay in sync with button state
         inline void setSync(bool sync = true) { m_synchronous = sync; }
 
-        // sets text displayed while led is active
+        // set text displayed while led is active
         inline void setActiveText(const QString& string) { m_activeText = string; }
 
-        // sets whether draw border or not
+        // set whether draw border or not
         inline void drawBorder(bool drawBorder = true) { m_hasBorder = drawBorder; }
 
-        // sets left-justify of icon
+        // set the border radius. 0 to disable
+        inline void setBorderRadius(uint8_t radius) { m_radius = radius; }
+
+        // set left-justify of icon
         inline void iconLeftJustify(bool leftJustify = true) { m_iconLeftJustify = leftJustify; }
 
-        // sets left padding of icon
+        // set left padding of icon
         inline void setIconLeftPadding(uint8_t padding) { m_iconLeftPadding = padding; }
 
         // use adaptive colors for the icon
         inline void setIconColorAdapting(bool state = true) { m_adaptIconsColor = state; }
 
-        // sets the touch screen mode state
+        // set the touch screen mode state
         inline void setTouchScreenMode(bool state = true)
         {
             m_touchScreenMode = state;
@@ -162,25 +145,23 @@ namespace gui
             m_timer.stop();
         }
 
-        // sets text left-justify
+        // set text left-justify
         inline void leftJustify(bool leftJustify = true) { m_leftJustify = leftJustify; }
 
-        // sets a left padding (valid with left-justify enabled)
+        // set a left padding (valid with left-justify enabled)
         inline void setLeftPadding(uint8_t padding) { m_leftPadding = padding; }
 
-        // sets wether the component must tune its width based on text width
+        // set wether the component must tune its width based on text width
         inline void shrinkToFIt(bool shrinkToFit = true) { m_shrinkToFit = shrinkToFit; }
 
-        // sets an offset to sum to shrink to fit calculations (left + right)
+        // set an offset to sum to shrink to fit calculations (left + right)
         inline void shrinkToFitPadding(uint8_t padding) { m_shrinkPadding = padding; }
 
-        // sets wether use animation while passing from non-hovering to hovering state and vice versa
-        void animateHovering(bool animate = true, const AnimationSpeed& speed = UltraButton::AS_Normal);
+        // set wether use animation while passing from non-hovering to hovering state and vice versa
+        void animateHovering(bool animate = true, AnimationSpeed speed = AS_Normal);
 
-       protected:
+       private:
         virtual void paintEvent(QPaintEvent* event) override;
-
-        virtual void additionalPainting(QPainter& painter);
 
         virtual void hideEvent(QHideEvent* event) override;
 
@@ -192,9 +173,14 @@ namespace gui
 
         virtual void mouseReleaseEvent(QMouseEvent* event) override;
 
+        virtual void leaveEvent(QEvent* event) override;
+
+        virtual void enterEvent(QEnterEvent* event) override;
+
         virtual void mouseMoveEvent(QMouseEvent* event) override;
 
-        virtual void leaveEvent(QEvent* event) override;
+       protected:
+        virtual void additionalPainting(QPainter& painter);
 
        signals:
         // Emitted when button is activated

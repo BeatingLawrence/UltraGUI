@@ -23,9 +23,9 @@ namespace gui
 
         QColor _computeTransient(const QColor& first, const QColor& second, uint8_t selector);
 
-       private slots:
         void _mouseClicked();
 
+       private slots:
         void _onTimerTick();
 
        protected:
@@ -36,6 +36,8 @@ namespace gui
         virtual void leaveEvent(QEvent* event) override;
 
         virtual void hideEvent(QHideEvent* event) override;
+
+        virtual void mousePressEvent(QMouseEvent* event) override;
 
        public:
         UltraToggle(QWidget* parent = nullptr);

@@ -59,6 +59,8 @@ MainWindow::MainWindow(QWidget* parent)
 {
     ui->setupUi(this);
     setDarkTheme(false);
+    ui->testPB->setBorderRadius(15);
+    ui->testPB->drawBorder();
     ui->stackedWidget->setCurrentWidget(ui->page_1);
     QWidget::setWindowTitle(gui::UltraGui::version().text.c_str());
     //
