@@ -1,0 +1,40 @@
+#ifndef TYPES_H
+#define TYPES_H
+
+#include <QString>
+#include <QVector>
+
+#include "./UltraGUI_global.h"
+
+namespace gui
+{
+    struct ULTRAGUI_EXPORT UltraGUIVersion
+    {
+        enum VersionType
+        {
+            Alpha,
+            Beta,
+            Release,
+        };
+
+        uint16_t major;
+        uint16_t minor;
+        uint16_t patch;
+        VersionType type;
+        std::string text;
+    };
+
+    // UltraEntry structure
+    struct ULTRAGUI_EXPORT UltraEntry
+    {
+        QString entryText;
+        int32_t entryId;
+        bool grayed;
+        void* data;
+    };
+
+    static const int32_t ULTRAGUI_EXPORT InvalidID = -1;
+
+}  // namespace gui
+
+#endif  // TYPES_H

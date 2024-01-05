@@ -1,0 +1,36 @@
+#ifndef ULTRAGUI_H
+#define ULTRAGUI_H
+
+#include <QString>
+
+#include "UltraGUI_global.h"
+#include "types.h"
+
+namespace gui
+{
+    class ULTRAGUI_EXPORT UltraGui
+    {
+       private:
+        struct dual
+        {
+            std::string left;
+            std::string right;
+        };
+
+        static std::string strPrint(std::string format, ...);
+        static std::string substrUntil(const std::string& str, const std::string& token);
+        static std::string substrFrom(const std::string& str, const std::string& token);
+        static dual split(const std::string& str, const std::string& token);
+
+       public:
+        // Create a single UltraEntry with an ID and a string
+        static UltraEntry createUltraEntry(QString string, int32_t id = InvalidID);
+
+        // Generate a vector of UltraEntry from a vector af strings. IDs are sequential.
+        static QVector<UltraEntry> createUltraEntryVector(QVector<QString> strings);
+
+        static UltraGUIVersion version();
+    };
+}  // namespace gui
+
+#endif  // ULTRAGUI_H
