@@ -11,37 +11,28 @@ using namespace gui;
 //=========================================================
 UltraButton::UltraButton(QWidget* parent)
     : QPushButton(parent),
+      m_state(Inactive),
+      m_configuration(),  // default constructor
       m_ledState(false),
-      m_buttonState(false),
-      m_toggleMode(false),
-      m_synchronous(true),
-      m_hovering(false),
       m_leftJustify(false),
+      m_geometryRequired(true),
       m_iconLeftJustify(false),
       m_shrinkToFit(false),
-      m_useHoveringAnimation(true),
       m_blinking(false),
       m_adaptIconsColor(true),
-      m_hasBorder(false),
-      m_geometryRequired(true),
-      m_touchScreenMode(false),
-      m_pressed(false),
-      m_activeText(""),
+      m_animationFlag(false),
       m_leftPadding(5),
       m_iconLeftPadding(1),
       m_shrinkPadding(0),
       m_hoveringAnimation(0),
       m_animationToSum(0),
-      m_radius(0),
+      m_activeText(""),
       m_defaultIcon(),
       m_activeIcon(),
       m_timer(this)
 {
     _configureTiming(AS_Normal);
-
-    // TODO: add macro that set mouse tracking to off if the system is MACOS
-    setMouseTracking(!m_touchScreenMode);
-    //
+    useHovering(m_configuration.hovering);
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(_tick()));
 }
 //=========================================================
@@ -75,7 +66,7 @@ void UltraButton::paintEvent(QPaintEvent* event)
 
     //=====================================================DRAW
 
-    if (m_hasBorder)
+    if (m_configuration.border)
         painter.setPen(QPen(QBrush(palette().color(QPalette::ButtonText)), 1, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin));
     else
         painter.setPen(QPen(Qt::NoPen));
@@ -136,15 +127,6 @@ void UltraButton::additionalPainting(QPainter& painter)
     // noop
 }
 //=========================================================
-void UltraButton::hideEvent(QHideEvent* event)
-{
-    m_hovering          = false;
-    m_blinking          = false;
-    m_hoveringAnimation = 0;
-    m_timer.stop();
-    QPushButton::hideEvent(event);
-}
-//=========================================================
 void UltraButton::changeEvent(QEvent* event)
 {
     if (event->type() == QEvent::ApplicationPaletteChange || event->type() == QEvent::PaletteChange)
@@ -167,52 +149,25 @@ void UltraButton::resizeEvent(QResizeEvent* event)
 //=========================================================
 void UltraButton::mousePressEvent(QMouseEvent* event)
 {
-    if (!m_toggleMode)
-    {
-        changeTo(true);
-    }
-    else if (m_touchScreenMode)
-    {
-        m_hoveringAnimation = 255;
-    }
-
-    update();
-    m_pressed = true;
+    transition(Press);
     QPushButton::mousePressEvent(event);
 }
 //=========================================================
 void UltraButton::mouseReleaseEvent(QMouseEvent* event)
 {
-    if (!m_toggleMode)
-    {
-        if (m_pressed) changeTo(false);
-    }
-    else
-    {
-        if (m_touchScreenMode)
-        {
-            m_hoveringAnimation = 0;
-            if (m_pressed) changeTo(!m_buttonState);
-        }
-        else if (m_hovering)
-            if (m_pressed) changeTo(!m_buttonState);
-    }
-
-    update();
-    m_pressed = false;
-
+    transition(Release);
     QPushButton::mouseReleaseEvent(event);
 }
 //=========================================================
 void UltraButton::leaveEvent(QEvent* event)
 {
-    cursorLeft();
+    transition(Leave);
     QPushButton::leaveEvent(event);
 }
 //=========================================================
 void UltraButton::enterEvent(QEnterEvent* event)
 {
-    cursorEntered();
+    transition(Enter);
     QPushButton::enterEvent(event);
 }
 //=========================================================
@@ -223,80 +178,184 @@ void UltraButton::mouseMoveEvent(QMouseEvent* event)
     bool hit = false;
     if (underMouse()) hit = hitButton(event->position().toPoint());
 
-    if (!hit && m_hovering && m_pressed) cursorLeft();
+    if (!hit && (m_state == ActivePressed || m_state == Pressed)) transition(Leave);
 }
 //=========================================================
-void UltraButton::cursorEntered()
+void UltraButton::transition(ButtonMachineEvent event)
 {
-    m_hovering = true;
-    if (!m_touchScreenMode)
+    ButtonMachineState newState = Invalid;
+
+    switch (m_state)
     {
-        m_blinking = false;
+        case Inactive:
+            if (event == Enter && m_configuration.hovering)
+            {
+                newState = Hovering;
+                animate(true);
+            }
+            else if (event == Press && !m_configuration.hovering)
+            {
+                if (m_configuration.toggle)
+                {
+                    newState = Pressed;
+                    animate(true);
+                }
+                else
+                    newState = ActivePressed;
+            }
+            else if (event == Release || event == Leave)
+            {
+                newState = Inactive;  // do not change
+                animate(false);
+            }
+            break;
 
-        if (m_useHoveringAnimation)
-            m_timer.start();
-        else
-            m_hoveringAnimation = 255;
+        case Hovering:
+            if (event == Leave)
+            {
+                newState = Inactive;
+                animate(false);
+            }
+            else if (event == Press)
+            {
+                if (m_configuration.toggle)
+                    newState = Pressed;
+                else
+                    newState = ActivePressed;
+            }
+            break;
+
+        case Pressed:
+            if (event == Release)
+                newState = Active;
+            else if (event == Leave)
+                newState = Inactive;
+            break;
+
+        case Active:
+            if (event == Press)
+                newState = ActivePressed;
+            else if (event == Enter || event == Leave || event == Release)
+                newState = Active;  // do not change
+            break;
+
+        case ActivePressed:
+            if (event == Leave)
+            {
+                if (m_configuration.toggle)
+                    newState = Active;
+                else
+                    newState = Inactive;
+            }
+            else if (event == Release)
+            {
+                if (m_configuration.hovering)
+                    newState = Hovering;
+                else
+                {
+                    newState = Inactive;
+                    if (m_configuration.toggle) animate(false);
+                }
+            }
+            break;
+        default:
+            break;
     }
-}
-//=========================================================
-void UltraButton::cursorLeft()
-{
-    m_hovering = false;
-    m_pressed  = false;
-    if (m_touchScreenMode || !m_useHoveringAnimation)
-        m_hoveringAnimation = 0;
-    else
-        m_timer.start();
 
-    if (!m_toggleMode) changeTo(false);
+    // qDebug("old state: %s, new state: %s, event: %s", debugState(m_state), debugState(newState), debugEvent(event));
+
+    if (newState != Invalid && m_state != newState)
+    {
+        notify(m_state, newState);
+        m_state = newState;
+    }
 
     update();
 }
 //=========================================================
-void UltraButton::changeTo(bool newState)
+void UltraButton::notify(ButtonMachineState oldState, ButtonMachineState newState)
 {
-    if (m_buttonState != newState)
+    if ((newState == Active && oldState == Pressed) || (newState == ActivePressed && oldState != Active))
     {
-        m_buttonState = newState;
-        if (newState)
-            emit onEnable();
-        else
-            emit onDisable();
+        // notify activation
+        emit onEnable();
+        emit onChange(true);
+        if (m_configuration.sync) m_ledState = true;
+    }
+    if ((newState == Inactive && oldState != Hovering && oldState != Pressed) || (newState == Hovering && oldState == ActivePressed))
+    {
+        // notify deactivation
+        emit onDisable();
+        emit onChange(false);
+        if (m_configuration.sync) m_ledState = false;
+    }
+}
+//=========================================================
+void UltraButton::animate(bool enter)
+{
+    m_animationFlag = enter;
 
-        emit onChange(newState);
-
-        if (m_synchronous)
-        {
-            activate(newState);
-        }
+    if (m_configuration.animateHovering)
+        m_timer.start();
+    else
+        m_hoveringAnimation = enter ? 255 : 0;
+}
+//=========================================================
+const char* UltraButton::debugState(ButtonMachineState state)
+{
+    switch (state)
+    {
+        case Inactive:
+            return "Inactive";
+        case Hovering:
+            return "Hovering";
+        case Pressed:
+            return "Pressed";
+        case Active:
+            return "Active";
+        case ActivePressed:
+            return "ActivePressed";
+        case Invalid:
+            return "Invalid";
+    }
+}
+//=========================================================
+const char* UltraButton::debugEvent(ButtonMachineEvent event)
+{
+    switch (event)
+    {
+        case Press:
+            return "Press";
+        case Release:
+            return "Release";
+        case Enter:
+            return "Enter";
+        case Leave:
+            return "Leave";
     }
 }
 //=========================================================
 void UltraButton::_tick()
 {
-    if (m_timer.isActive())
+    if (m_animationFlag || m_blinking)
     {
-        if (m_hovering || m_blinking)
-        {
-            _sum(m_hoveringAnimation, m_animationToSum, 255);
-        }
-        else
-        {
-            _sum(m_hoveringAnimation, m_animationToSum, 255, true);
-        }
-
-        if (m_blinking && m_hoveringAnimation == 255)
-        {
-            m_blinking = false;
-        }
-        else if (m_hoveringAnimation == 0 || m_hoveringAnimation == 255)
-        {
-            m_timer.stop();
-        }
-
-        repaint();
+        _sum(m_hoveringAnimation, m_animationToSum, 255);
     }
+    else
+    {
+        _sum(m_hoveringAnimation, m_animationToSum, 255, true);
+    }
+
+    if (m_blinking && m_hoveringAnimation == 255)
+    {
+        m_blinking = false;
+    }
+    else if (m_hoveringAnimation == 0 || m_hoveringAnimation == 255)
+    {
+        m_timer.stop();
+    }
+
+    repaint();
 }
 //=========================================================
 void UltraButton::_writeString(QPainter& painter, const QString& string, const QColor& color)
@@ -346,24 +405,16 @@ void UltraButton::_sum(uint8_t& value, uint8_t toSum, uint8_t max, bool subtract
     if (subtract)
     {
         if (toSum > value)
-        {
             value = 0;
-        }
         else
-        {
             value -= toSum;
-        }
     }
     else
     {
         if ((uint16_t)((uint16_t)value + (uint16_t)toSum) > (uint16_t)max)
-        {
             value = max;
-        }
         else
-        {
             value += toSum;
-        }
     }
 }
 //=========================================================
@@ -409,8 +460,8 @@ void UltraButton::_computeGeometry()
     QRect r = rect();
     r.adjust(1, 1, -1, -1);
 
-    if (m_radius)
-        m_frame.addRoundedRect(r, m_radius, m_radius);
+    if (m_configuration.radius)
+        m_frame.addRoundedRect(r, m_configuration.radius, m_configuration.radius);
     else
         m_frame.addRect(r);
 
@@ -419,39 +470,36 @@ void UltraButton::_computeGeometry()
 //=========================================================
 void UltraButton::setIcons(const QPixmap& defaultIcon, const QPixmap& activeIcon, bool colorAdapting)
 {
-    if (defaultIcon.isNull())
-    {
-        return;
-    }
+    if (defaultIcon.isNull()) return;
 
-    if (defaultIcon.width() > width() && defaultIcon.height() > height())
-    {
-        return;
-    }
+    if (defaultIcon.width() > width() && defaultIcon.height() > height()) return;
 
     m_defaultIcon = defaultIcon.copy();
 
     if (!activeIcon.isNull())
     {
-        if (defaultIcon.size() == activeIcon.size())
-        {
-            m_activeIcon = activeIcon.copy();
-        }
+        if (defaultIcon.size() == activeIcon.size()) m_activeIcon = activeIcon.copy();
     }
 
     m_adaptIconsColor = colorAdapting;
 
-    if (colorAdapting)
-    {
-        _adaptIconsColor();
-    }
+    if (colorAdapting) _adaptIconsColor();
 
+    update();
+}
+//=========================================================
+void UltraButton::useHovering(bool use)
+{
+    setMouseTracking(use);
+    m_configuration.hovering = use;
+    m_state                  = Inactive;  // force state machine reset
+    if (m_configuration.sync) m_ledState = false;
     update();
 }
 //=========================================================
 void UltraButton::blink()
 {
-    if (!m_hovering)
+    if (m_state != Hovering)
     {
         m_blinking = true;
         m_timer.start();
@@ -468,7 +516,7 @@ void UltraButton::deactivate() { activate(false); }
 //=========================================================
 void UltraButton::animateHovering(bool animate, AnimationSpeed speed)
 {
-    m_useHoveringAnimation = animate;
+    m_configuration.animateHovering = animate;
     _configureTiming(speed);
 }
 //=========================================================

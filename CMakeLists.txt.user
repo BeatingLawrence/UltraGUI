@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 12.0.1, 2024-01-05T17:17:30. -->
+<!-- Written by QtCreator 12.0.1, 2024-01-06T15:29:47. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -92,7 +92,7 @@
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Qt 6.6.0 for macOS</value>
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Qt 6.6.0 for macOS</value>
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">qt.qt6.660.clang_64_kit</value>
-   <value type="qlonglong" key="ProjectExplorer.Target.ActiveBuildConfiguration">0</value>
+   <value type="qlonglong" key="ProjectExplorer.Target.ActiveBuildConfiguration">2</value>
    <value type="qlonglong" key="ProjectExplorer.Target.ActiveDeployConfiguration">0</value>
    <value type="qlonglong" key="ProjectExplorer.Target.ActiveRunConfiguration">0</value>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.0">
@@ -299,7 +299,7 @@
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">/Users/lory/Desktop/ultragui-workspace/build-UltraGUI-Qt_6_6_0_for_macOS-Debug</value>
+    <value type="QString" key="RunConfiguration.WorkingDirectory.default">/Users/lory/Desktop/ultragui-workspace/build-UltraGUI-Qt_6_6_0_for_macOS-TestAPP</value>
    </valuemap>
    <value type="qlonglong" key="ProjectExplorer.Target.RunConfigurationCount">1</value>
   </valuemap>

@@ -52,7 +52,7 @@
 #include <QPushButton>
 #include <QTimer>
 
-#include "./UltraGUI_global.h"
+#include "UltraGUI_global.h"
 #include "types.h"
 
 namespace gui
@@ -62,11 +62,48 @@ namespace gui
         Q_OBJECT
 
        private:
-        bool m_ledState, m_buttonState, m_toggleMode, m_synchronous, m_hovering, m_leftJustify;
-        bool m_iconLeftJustify, m_shrinkToFit, m_useHoveringAnimation, m_blinking, m_adaptIconsColor;
-        bool m_hasBorder, m_geometryRequired, m_touchScreenMode, m_pressed;
+        enum ButtonMachineState
+        {
+            Inactive,
+            Hovering,
+            Pressed,
+            Active,
+            ActivePressed,
+            //
+            Invalid,  // used for debug
+        } m_state;
+
+        enum ButtonMachineEvent
+        {
+            Press,    // mouse press the button
+            Release,  // mouse release the button
+            Enter,    // mouse enters the button perimeter
+            Leave,    // mouse leaves the button perimeter
+        };
+
+        struct Configuration
+        {
+            bool toggle;           // toggle mode
+            bool hovering;         // use hovering (false if using touchscreen)
+            bool animateHovering;  // use animation for hovering transitions
+            bool sync;             // led and button share the same state
+            bool border;           // draw border
+            uint8_t radius;        // border radius
+
+            Configuration()  // default configuration
+                : toggle(false),
+                  hovering(false),
+                  animateHovering(true),
+                  sync(true),
+                  border(false)
+            {
+            }
+        } m_configuration;
+
+        bool m_ledState, m_leftJustify, m_geometryRequired;
+        bool m_iconLeftJustify, m_shrinkToFit, m_blinking, m_adaptIconsColor, m_animationFlag;
+        uint8_t m_leftPadding, m_iconLeftPadding, m_shrinkPadding, m_hoveringAnimation, m_animationToSum;
         QString m_activeText;
-        uint8_t m_leftPadding, m_iconLeftPadding, m_shrinkPadding, m_hoveringAnimation, m_animationToSum, m_radius;
 
         QPixmap m_defaultIcon, m_activeIcon;
 
@@ -88,11 +125,15 @@ namespace gui
 
         void _computeGeometry();
 
-        void cursorEntered();
+        void transition(ButtonMachineEvent event);
 
-        void cursorLeft();
+        void notify(ButtonMachineState oldState, ButtonMachineState newState);
 
-        void changeTo(bool newState);
+        void animate(bool enter);
+
+        const char* debugState(ButtonMachineState state);
+
+        const char* debugEvent(ButtonMachineEvent event);
 
        private slots:
         void _tick();
@@ -106,25 +147,25 @@ namespace gui
         void setIcons(const QPixmap& defaultIcon, const QPixmap& activeIcon = QPixmap(), bool colorAdapting = true);
 
         // get button state
-        inline bool isButtonActive() const { return m_buttonState; }
+        inline bool isButtonActive() const { return m_state == Active; }
 
         // get LED state
         inline bool isLedActive() const { return m_ledState; }
 
         // set if the button is a toggle
-        inline void setToggleMode(bool toggleMode) { m_toggleMode = toggleMode; }
+        inline void setToggleMode(bool toggleMode) { m_configuration.toggle = toggleMode; }
 
         // set wether LED state must stay in sync with button state
-        inline void setSync(bool sync = true) { m_synchronous = sync; }
+        inline void setSync(bool sync = true) { m_configuration.sync = sync; }
 
         // set text displayed while led is active
         inline void setActiveText(const QString& string) { m_activeText = string; }
 
         // set whether draw border or not
-        inline void drawBorder(bool drawBorder = true) { m_hasBorder = drawBorder; }
+        inline void drawBorder(bool drawBorder = true) { m_configuration.border = drawBorder; }
 
         // set the border radius. 0 to disable
-        inline void setBorderRadius(uint8_t radius) { m_radius = radius; }
+        inline void setBorderRadius(uint8_t radius) { m_configuration.radius = radius; }
 
         // set left-justify of icon
         inline void iconLeftJustify(bool leftJustify = true) { m_iconLeftJustify = leftJustify; }
@@ -134,16 +175,6 @@ namespace gui
 
         // use adaptive colors for the icon
         inline void setIconColorAdapting(bool state = true) { m_adaptIconsColor = state; }
-
-        // set the touch screen mode state
-        inline void setTouchScreenMode(bool state = true)
-        {
-            m_touchScreenMode = state;
-            setMouseTracking(!state);
-            m_hovering          = false;
-            m_hoveringAnimation = 0;
-            m_timer.stop();
-        }
 
         // set text left-justify
         inline void leftJustify(bool leftJustify = true) { m_leftJustify = leftJustify; }
@@ -157,13 +188,14 @@ namespace gui
         // set an offset to sum to shrink to fit calculations (left + right)
         inline void shrinkToFitPadding(uint8_t padding) { m_shrinkPadding = padding; }
 
+        // set wether the hovering (mouse tracking) must be used or not
+        void useHovering(bool use = true);
+
         // set wether use animation while passing from non-hovering to hovering state and vice versa
         void animateHovering(bool animate = true, AnimationSpeed speed = AS_Normal);
 
        private:
         virtual void paintEvent(QPaintEvent* event) override;
-
-        virtual void hideEvent(QHideEvent* event) override;
 
         virtual void changeEvent(QEvent* event) override;
 

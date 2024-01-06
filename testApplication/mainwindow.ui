@@ -224,7 +224,7 @@
                  <item>
                   <widget class="QCheckBox" name="buttonTestTouchCB">
                    <property name="text">
-                    <string>Touch-screen</string>
+                    <string>Hovering</string>
                    </property>
                   </widget>
                  </item>

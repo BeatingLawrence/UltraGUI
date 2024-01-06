@@ -51,7 +51,7 @@ void MainWindow::testButtonDisabled() { ui->buttonLogger->push("Test Button Disa
 //=========================================================
 void MainWindow::buttonTestToggleCBChange(int x) { ui->testPB->setToggleMode(x != 0); }
 //=========================================================
-void MainWindow::buttonTestTouchCBChange(int x) { ui->testPB->setTouchScreenMode(x != 0); }
+void MainWindow::buttonTestTouchCBChange(int x) { ui->testPB->useHovering(x != 0); }
 //=========================================================
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent),
@@ -59,7 +59,7 @@ MainWindow::MainWindow(QWidget* parent)
 {
     ui->setupUi(this);
     setDarkTheme(false);
-    ui->testPB->setBorderRadius(15);
+    ui->testPB->setBorderRadius(5);
     ui->testPB->drawBorder();
     ui->stackedWidget->setCurrentWidget(ui->page_1);
     QWidget::setWindowTitle(gui::UltraGui::version().text.c_str());
