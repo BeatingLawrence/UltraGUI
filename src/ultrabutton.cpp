@@ -6,24 +6,19 @@
 #include <QPainterPathStroker>
 #include <QResizeEvent>
 
+#include "ultragui.h"
+
 using namespace gui;
 
 //=========================================================
 UltraButton::UltraButton(QWidget* parent)
-    : QPushButton(parent),
-      m_state(Inactive),
+    : ButtonBehavior(parent),
       m_configuration(),  // default constructor
       m_ledState(false),
-      m_leftJustify(false),
       m_geometryRequired(true),
-      m_iconLeftJustify(false),
-      m_shrinkToFit(false),
+      m_animationFlag(false),
       m_blinking(false),
       m_adaptIconsColor(true),
-      m_animationFlag(false),
-      m_leftPadding(5),
-      m_iconLeftPadding(1),
-      m_shrinkPadding(0),
       m_hoveringAnimation(0),
       m_animationToSum(0),
       m_activeText(""),
@@ -32,7 +27,6 @@ UltraButton::UltraButton(QWidget* parent)
       m_timer(this)
 {
     _configureTiming(AS_Normal);
-    useHovering(m_configuration.hovering);
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(_tick()));
 }
 //=========================================================
@@ -44,17 +38,12 @@ void UltraButton::paintEvent(QPaintEvent* event)
 
     if (m_geometryRequired) _computeGeometry();
 
+    if (m_configuration.sync) m_ledState = isActive();
+
     QPainter painter(this);
     painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
     painter.setRenderHint(QPainter::Antialiasing, true);
     painter.setFont(font());
-
-    if (m_shrinkToFit && !text().isEmpty())
-    {
-        int widthOfText = painter.fontMetrics().horizontalAdvance(text());
-        setFixedWidth(widthOfText + m_shrinkPadding);
-        // TODO make the text dimension adapting to the button size and not vice versa
-    }
 
     //=====================================================COLOR
     QColor fillColor;
@@ -62,7 +51,7 @@ void UltraButton::paintEvent(QPaintEvent* event)
     if (m_ledState)
         fillColor = palette().color(QPalette::Light);
     else
-        fillColor = _computeTransient(palette().color(QPalette::Button), palette().color(QPalette::Midlight), m_hoveringAnimation);
+        fillColor = UltraGui::transient(palette().color(QPalette::Button), palette().color(QPalette::Midlight), m_hoveringAnimation);
 
     //=====================================================DRAW
 
@@ -95,7 +84,7 @@ void UltraButton::paintEvent(QPaintEvent* event)
     }
     else
     {
-        int xPos = m_iconLeftJustify ? m_iconLeftPadding : (width() / 2) - (m_defaultIcon.width() / 2);
+        int xPos = (width() / 2) - (m_defaultIcon.width() / 2);
         int yPos = (height() / 2) - (m_defaultIcon.height() / 2);
         QRect target(xPos, yPos, m_defaultIcon.width(), m_defaultIcon.height());
 
@@ -106,19 +95,6 @@ void UltraButton::paintEvent(QPaintEvent* event)
     }
 
     additionalPainting(painter);
-}
-//=========================================================
-QColor UltraButton::_computeTransient(const QColor& first, const QColor& second, uint8_t selector)
-{
-    float mR  = second.redF() - first.redF();
-    float mG  = second.greenF() - first.greenF();
-    float mB  = second.blueF() - first.blueF();
-    float mA  = second.alphaF() - first.alphaF();
-    uint8_t R = ((float)selector * mR) + first.red();
-    uint8_t G = ((float)selector * mG) + first.green();
-    uint8_t B = ((float)selector * mB) + first.blue();
-    uint8_t A = ((float)selector * mA) + first.alpha();
-    return QColor(R, G, B, A);
 }
 //=========================================================
 void UltraButton::additionalPainting(QPainter& painter)
@@ -147,150 +123,6 @@ void UltraButton::resizeEvent(QResizeEvent* event)
     QPushButton::resizeEvent(event);
 }
 //=========================================================
-void UltraButton::mousePressEvent(QMouseEvent* event)
-{
-    transition(Press);
-    QPushButton::mousePressEvent(event);
-}
-//=========================================================
-void UltraButton::mouseReleaseEvent(QMouseEvent* event)
-{
-    transition(Release);
-    QPushButton::mouseReleaseEvent(event);
-}
-//=========================================================
-void UltraButton::leaveEvent(QEvent* event)
-{
-    transition(Leave);
-    QPushButton::leaveEvent(event);
-}
-//=========================================================
-void UltraButton::enterEvent(QEnterEvent* event)
-{
-    transition(Enter);
-    QPushButton::enterEvent(event);
-}
-//=========================================================
-void UltraButton::mouseMoveEvent(QMouseEvent* event)
-{
-    QPushButton::mouseMoveEvent(event);
-
-    bool hit = false;
-    if (underMouse()) hit = hitButton(event->position().toPoint());
-
-    if (!hit && (m_state == ActivePressed || m_state == Pressed)) transition(Leave);
-}
-//=========================================================
-void UltraButton::transition(ButtonMachineEvent event)
-{
-    ButtonMachineState newState = Invalid;
-
-    switch (m_state)
-    {
-        case Inactive:
-            if (event == Enter && m_configuration.hovering)
-            {
-                newState = Hovering;
-                animate(true);
-            }
-            else if (event == Press && !m_configuration.hovering)
-            {
-                if (m_configuration.toggle)
-                {
-                    newState = Pressed;
-                    animate(true);
-                }
-                else
-                    newState = ActivePressed;
-            }
-            else if (event == Release || event == Leave)
-            {
-                newState = Inactive;  // do not change
-                animate(false);
-            }
-            break;
-
-        case Hovering:
-            if (event == Leave)
-            {
-                newState = Inactive;
-                animate(false);
-            }
-            else if (event == Press)
-            {
-                if (m_configuration.toggle)
-                    newState = Pressed;
-                else
-                    newState = ActivePressed;
-            }
-            break;
-
-        case Pressed:
-            if (event == Release)
-                newState = Active;
-            else if (event == Leave)
-                newState = Inactive;
-            break;
-
-        case Active:
-            if (event == Press)
-                newState = ActivePressed;
-            else if (event == Enter || event == Leave || event == Release)
-                newState = Active;  // do not change
-            break;
-
-        case ActivePressed:
-            if (event == Leave)
-            {
-                if (m_configuration.toggle)
-                    newState = Active;
-                else
-                    newState = Inactive;
-            }
-            else if (event == Release)
-            {
-                if (m_configuration.hovering)
-                    newState = Hovering;
-                else
-                {
-                    newState = Inactive;
-                    if (m_configuration.toggle) animate(false);
-                }
-            }
-            break;
-        default:
-            break;
-    }
-
-    // qDebug("old state: %s, new state: %s, event: %s", debugState(m_state), debugState(newState), debugEvent(event));
-
-    if (newState != Invalid && m_state != newState)
-    {
-        notify(m_state, newState);
-        m_state = newState;
-    }
-
-    update();
-}
-//=========================================================
-void UltraButton::notify(ButtonMachineState oldState, ButtonMachineState newState)
-{
-    if ((newState == Active && oldState == Pressed) || (newState == ActivePressed && oldState != Active))
-    {
-        // notify activation
-        emit onEnable();
-        emit onChange(true);
-        if (m_configuration.sync) m_ledState = true;
-    }
-    if ((newState == Inactive && oldState != Hovering && oldState != Pressed) || (newState == Hovering && oldState == ActivePressed))
-    {
-        // notify deactivation
-        emit onDisable();
-        emit onChange(false);
-        if (m_configuration.sync) m_ledState = false;
-    }
-}
-//=========================================================
 void UltraButton::animate(bool enter)
 {
     m_animationFlag = enter;
@@ -301,39 +133,24 @@ void UltraButton::animate(bool enter)
         m_hoveringAnimation = enter ? 255 : 0;
 }
 //=========================================================
-const char* UltraButton::debugState(ButtonMachineState state)
+void UltraButton::adjustTextSize()
 {
-    switch (state)
+    auto f = font();
+    f.setPixelSize(1);
+    int textW = QFontMetrics(f).horizontalAdvance(text());
+
+    while (textW < width() && f.pixelSize() <= 80)
     {
-        case Inactive:
-            return "Inactive";
-        case Hovering:
-            return "Hovering";
-        case Pressed:
-            return "Pressed";
-        case Active:
-            return "Active";
-        case ActivePressed:
-            return "ActivePressed";
-        case Invalid:
-            return "Invalid";
+        f.setPixelSize(f.pixelSize() + 1);
+        textW = QFontMetrics(f).horizontalAdvance(text());
     }
+
+    setFont(f);
 }
 //=========================================================
-const char* UltraButton::debugEvent(ButtonMachineEvent event)
-{
-    switch (event)
-    {
-        case Press:
-            return "Press";
-        case Release:
-            return "Release";
-        case Enter:
-            return "Enter";
-        case Leave:
-            return "Leave";
-    }
-}
+void UltraButton::fadeIn() { animate(true); }
+//=========================================================
+void UltraButton::fadeOut() { animate(false); }
 //=========================================================
 void UltraButton::_tick()
 {
@@ -364,14 +181,9 @@ void UltraButton::_writeString(QPainter& painter, const QString& string, const Q
     pen.setColor(color);
     painter.setPen(pen);
 
-    if (m_leftJustify)
-    {
-        painter.drawText(rect().adjusted(m_leftPadding, 0, 0, 0), Qt::AlignLeft | Qt::AlignVCenter, string);
-    }
-    else
-    {
-        painter.drawText(rect(), Qt::AlignHCenter | Qt::AlignVCenter, string);
-    }
+    // left justified:
+    // painter.drawText(rect().adjusted(m_leftPadding, 0, 0, 0), Qt::AlignLeft | Qt::AlignVCenter, string);
+    painter.drawText(rect(), Qt::AlignHCenter | Qt::AlignVCenter, string);
 }
 //=========================================================
 void UltraButton::_configureTiming(AnimationSpeed speed)
@@ -488,22 +300,22 @@ void UltraButton::setIcons(const QPixmap& defaultIcon, const QPixmap& activeIcon
     update();
 }
 //=========================================================
-void UltraButton::useHovering(bool use)
+void UltraButton::setTextFit(bool fit)
 {
-    setMouseTracking(use);
-    m_configuration.hovering = use;
-    m_state                  = Inactive;  // force state machine reset
-    if (m_configuration.sync) m_ledState = false;
-    update();
+    m_configuration.textFit = fit;
+    if (fit) adjustTextSize();
+}
+//=========================================================
+void UltraButton::setText(const QString& text)
+{
+    QPushButton::setText(text);
+    if (m_configuration.textFit) adjustTextSize();
 }
 //=========================================================
 void UltraButton::blink()
 {
-    if (m_state != Hovering)
-    {
-        m_blinking = true;
-        m_timer.start();
-    }
+    m_blinking = true;
+    m_timer.start();
 }
 //=========================================================
 void UltraButton::activate(bool active)

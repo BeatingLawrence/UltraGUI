@@ -1,61 +1,51 @@
 #ifndef GUI_ULTRATOGGLE_H
 #define GUI_ULTRATOGGLE_H
 
-#include <QPushButton>
+#include <QPainterPath>
 #include <QTimer>
 
 #include "UltraGUI_global.h"
+#include "buttonbehavior.h"
 
 namespace gui
 {
-    class ULTRAGUI_EXPORT UltraToggle : public QPushButton
+    class ULTRAGUI_EXPORT UltraToggle : public ButtonBehavior
     {
         Q_OBJECT
 
        private:
-        bool m_state;
-
-        bool m_hovering;
-
-        unsigned int m_slideAnimation;
+        uint32_t m_slideAnimation, m_animationMax;
 
         QTimer m_timer;
 
-        QColor _computeTransient(const QColor& first, const QColor& second, uint8_t selector);
+        QPainterPath m_path;
 
         void _mouseClicked();
 
-       private slots:
-        void _onTimerTick();
-
-       protected:
         virtual void paintEvent(QPaintEvent* event) override;
 
-        virtual void enterEvent(QEnterEvent* event) override;
+        virtual void resizeEvent(QResizeEvent* event) override;
 
-        virtual void leaveEvent(QEvent* event) override;
+        virtual void stateChange(bool newState) override;
 
-        virtual void hideEvent(QHideEvent* event) override;
-
-        virtual void mousePressEvent(QMouseEvent* event) override;
+       private slots:
+        void _onTimerTick();
 
        public:
         UltraToggle(QWidget* parent = nullptr);
 
         virtual ~UltraToggle();
 
-        inline bool getState() const { return m_state; }
+        inline bool getState() const { return isActive(); }
+
+        // Set the button as a toggle or a momentary button
+        inline void setToggleMode(bool toggleMode) { configureToggle(toggleMode); }
+
+        // Set wether the hovering (mouse tracking) must be used or not
+        inline void useHovering(bool use) { configureHovering(use); };
 
        public slots:
-
         void setState(bool state, bool useAnimation = true);
-
-       signals:
-        void onEnable();
-
-        void onDisable();
-
-        void onChange(bool newState);
     };
 }  // namespace gui
 

@@ -62,6 +62,7 @@ MainWindow::MainWindow(QWidget* parent)
     ui->testPB->setBorderRadius(5);
     ui->testPB->drawBorder();
     ui->stackedWidget->setCurrentWidget(ui->page_1);
+    ui->darkThemeToggle->setToggleMode(true);
     QWidget::setWindowTitle(gui::UltraGui::version().text.c_str());
     //
     connect(ui->darkThemeToggle, SIGNAL(onChange(bool)), this, SLOT(setDarkTheme(bool)));

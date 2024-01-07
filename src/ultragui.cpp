@@ -71,6 +71,19 @@ QVector<UltraEntry> UltraGui::createUltraEntryVector(QVector<QString> strings)
     return toReturn;
 }
 //=============================================================================
+QColor UltraGui::transient(const QColor& first, const QColor& second, uint8_t selector)
+{
+    float mR  = second.redF() - first.redF();
+    float mG  = second.greenF() - first.greenF();
+    float mB  = second.blueF() - first.blueF();
+    float mA  = second.alphaF() - first.alphaF();
+    uint8_t R = ((float)selector * mR) + first.red();
+    uint8_t G = ((float)selector * mG) + first.green();
+    uint8_t B = ((float)selector * mB) + first.blue();
+    uint8_t A = ((float)selector * mA) + first.alpha();
+    return QColor(R, G, B, A);
+}
+//=============================================================================
 UltraGUIVersion UltraGui::version()
 {
     UltraGUIVersion ret;

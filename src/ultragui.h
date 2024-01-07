@@ -1,6 +1,7 @@
 #ifndef ULTRAGUI_H
 #define ULTRAGUI_H
 
+#include <QColor>
 #include <QString>
 
 #include "UltraGUI_global.h"
@@ -28,6 +29,8 @@ namespace gui
 
         // Generate a vector of UltraEntry from a vector af strings. IDs are sequential.
         static QVector<UltraEntry> createUltraEntryVector(QVector<QString> strings);
+
+        static QColor transient(const QColor& first, const QColor& second, uint8_t selector);
 
         static UltraGUIVersion version();
     };
