@@ -40,12 +40,15 @@ void UltraButton::paintEvent(QPaintEvent* event)
 
     if (m_configuration.sync) m_ledState = isActive();
 
-    QPainter painter(this);
-    painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
-    painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.setFont(font());
+    QString str;
+
+    if (m_activeText.isEmpty())
+        str = text();
+    else
+        str = m_ledState ? m_activeText : text();
 
     //=====================================================COLOR
+
     QColor fillColor;
 
     if (m_ledState)
@@ -55,6 +58,12 @@ void UltraButton::paintEvent(QPaintEvent* event)
 
     //=====================================================DRAW
 
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    painter.setFont(m_configuration.textFit ? adjustedFont(str) : font());
+
+    painter.save();
     if (m_configuration.border)
         painter.setPen(QPen(QBrush(palette().color(QPalette::ButtonText)), 1, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin));
     else
@@ -62,25 +71,18 @@ void UltraButton::paintEvent(QPaintEvent* event)
 
     painter.setBrush(QBrush(fillColor));
     painter.drawPath(m_frame);
+    painter.restore();
 
     //=====================================================ICON & TEXT
 
     if (m_defaultIcon.isNull())
     {
-        if (m_ledState)
-        {
-            if (m_activeText.isEmpty() && !text().isEmpty())
-                _writeString(painter, text(), palette().color(QPalette::ButtonText));
-            else
-                _writeString(painter, m_activeText, palette().color(QPalette::ButtonText));
-        }
-        else
-        {
-            if (text().isEmpty() && !m_activeText.isEmpty())
-                _writeString(painter, m_activeText, palette().color(QPalette::ButtonText));
-            else
-                _writeString(painter, text(), palette().color(QPalette::ButtonText));
-        }
+        painter.setPen(palette().color(QPalette::ButtonText));
+
+        // left justified:
+        // painter.drawText(rect().adjusted(m_leftPadding, 0, 0, 0), Qt::AlignLeft | Qt::AlignVCenter, string);
+        // centered:
+        painter.drawText(rect(), Qt::AlignHCenter | Qt::AlignVCenter, str);
     }
     else
     {
@@ -93,14 +95,6 @@ void UltraButton::paintEvent(QPaintEvent* event)
         else
             painter.drawPixmap(target, m_defaultIcon, m_defaultIcon.rect());
     }
-
-    additionalPainting(painter);
-}
-//=========================================================
-void UltraButton::additionalPainting(QPainter& painter)
-{
-    (void)painter;
-    // noop
 }
 //=========================================================
 void UltraButton::changeEvent(QEvent* event)
@@ -133,19 +127,19 @@ void UltraButton::animate(bool enter)
         m_hoveringAnimation = enter ? 255 : 0;
 }
 //=========================================================
-void UltraButton::adjustTextSize()
+QFont UltraButton::adjustedFont(const QString& text)
 {
     auto f = font();
     f.setPixelSize(1);
-    int textW = QFontMetrics(f).horizontalAdvance(text());
+    int textW = QFontMetrics(f).horizontalAdvance(text);
 
-    while (textW < width() && f.pixelSize() <= 80)
+    while (textW <= width() && f.pixelSize() <= height())
     {
         f.setPixelSize(f.pixelSize() + 1);
-        textW = QFontMetrics(f).horizontalAdvance(text());
+        textW = QFontMetrics(f).horizontalAdvance(text);
     }
 
-    setFont(f);
+    return f;
 }
 //=========================================================
 void UltraButton::fadeIn() { animate(true); }
@@ -173,17 +167,6 @@ void UltraButton::_tick()
     }
 
     repaint();
-}
-//=========================================================
-void UltraButton::_writeString(QPainter& painter, const QString& string, const QColor& color)
-{
-    QPen pen = painter.pen();
-    pen.setColor(color);
-    painter.setPen(pen);
-
-    // left justified:
-    // painter.drawText(rect().adjusted(m_leftPadding, 0, 0, 0), Qt::AlignLeft | Qt::AlignVCenter, string);
-    painter.drawText(rect(), Qt::AlignHCenter | Qt::AlignVCenter, string);
 }
 //=========================================================
 void UltraButton::_configureTiming(AnimationSpeed speed)
@@ -300,31 +283,19 @@ void UltraButton::setIcons(const QPixmap& defaultIcon, const QPixmap& activeIcon
     update();
 }
 //=========================================================
-void UltraButton::setTextFit(bool fit)
-{
-    m_configuration.textFit = fit;
-    if (fit) adjustTextSize();
-}
-//=========================================================
-void UltraButton::setText(const QString& text)
-{
-    QPushButton::setText(text);
-    if (m_configuration.textFit) adjustTextSize();
-}
-//=========================================================
 void UltraButton::blink()
 {
     m_blinking = true;
     m_timer.start();
 }
 //=========================================================
-void UltraButton::activate(bool active)
+void UltraButton::setState(bool state) { forceState(state); }
+//=========================================================
+void UltraButton::setLedState(bool state)
 {
-    m_ledState = active;
+    m_ledState = state;
     update();
 }
-//=========================================================
-void UltraButton::deactivate() { activate(false); }
 //=========================================================
 void UltraButton::animateHovering(bool animate, AnimationSpeed speed)
 {

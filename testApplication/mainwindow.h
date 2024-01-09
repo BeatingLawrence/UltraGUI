@@ -25,6 +25,11 @@ class MainWindow : public QMainWindow
     void testButtonClicked();
     void testButtonEnabled();
     void testButtonDisabled();
+    //
+    void testToggleEnabled();
+    void testToggleDisabled();
+    void testToggleForceDisableClicked();
+    void testToggleForceEnableClicked();
 
     void buttonTestToggleCBChange(int);
     void buttonTestTouchCBChange(int);

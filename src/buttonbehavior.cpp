@@ -215,3 +215,29 @@ bool ButtonBehavior::isActive() const { return m_active; }
 //=========================================================
 bool ButtonBehavior::isHovering() const { return m_hovering; }
 //=========================================================
+void ButtonBehavior::forceState(bool state)
+{
+    if (!m_conf.toggle) return;
+    if (state == m_active) return;
+
+    if (state)
+    {
+        m_state = Active;
+        // notify activation
+        emit onEnable();
+        emit onChange(true);
+    }
+    else
+    {
+        m_state = m_hovering && m_conf.hovering ? Hovering : Inactive;
+        // notify deactivation
+        emit onDisable();
+        emit onChange(false);
+    }
+
+    m_active = state;
+    stateChange(state);
+
+    update();
+}
+//=========================================================

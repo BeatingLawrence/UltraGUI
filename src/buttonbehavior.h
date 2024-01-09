@@ -52,7 +52,7 @@ namespace gui
         // Called when the cursor enters the widget
         virtual void fadeIn();
 
-        // called when the cursor leaves the widget
+        // Called when the cursor leaves the widget
         virtual void fadeOut();
 
         // Called when the button is clicked
@@ -65,6 +65,9 @@ namespace gui
         bool isActive() const;
 
         bool isHovering() const;
+
+        // force the state (only in toggle mode)
+        void forceState(bool state);
 
        private:
         void transition(ButtonMachineEvent event);

@@ -4,8 +4,8 @@
 #include <QColor>
 #include <QString>
 
-#include "UltraGUI_global.h"
 #include "types.h"
+#include "ultragui_global.h"
 
 namespace gui
 {

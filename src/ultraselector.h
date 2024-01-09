@@ -4,8 +4,8 @@
 #include <QTimer>
 #include <QWidget>
 
-#include "UltraGUI_global.h"
 #include "types.h"
+#include "ultragui_global.h"
 
 namespace gui
 {

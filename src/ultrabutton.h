@@ -51,9 +51,9 @@
 #include <QPixmap>
 #include <QTimer>
 
-#include "UltraGUI_global.h"
 #include "buttonbehavior.h"
 #include "types.h"
+#include "ultragui_global.h"
 
 namespace gui
 {
@@ -90,8 +90,6 @@ namespace gui
         QPainterPath m_frame;
         //=============================
 
-        void _writeString(QPainter& painter, const QString& string, const QColor& color);
-
         void _configureTiming(AnimationSpeed speed);
 
         void _sum(uint8_t& value, uint8_t toSum, uint8_t max, bool subtract = false);
@@ -102,7 +100,7 @@ namespace gui
 
         void animate(bool enter);
 
-        void adjustTextSize();
+        QFont adjustedFont(const QString& text);
 
         virtual void fadeIn() override;
 
@@ -144,9 +142,7 @@ namespace gui
         inline void setBorderRadius(uint8_t radius) { m_configuration.radius = radius; }
 
         // Set wether the text size must be adjusted to match the button width
-        void setTextFit(bool fit);
-
-        void setText(const QString& text);
+        inline void setTextFit(bool fit) { m_configuration.textFit = fit; }
 
         // use adaptive colors for the icon
         inline void setIconColorAdapting(bool state = true) { m_adaptIconsColor = state; }
@@ -161,17 +157,14 @@ namespace gui
 
         virtual void resizeEvent(QResizeEvent* event) override;
 
-       protected:
-        virtual void additionalPainting(QPainter& painter);
-
        public slots:
         void blink();
 
-        // Set led state
-        void activate(bool active = true);
+        // Set button state
+        void setState(bool state);
 
-        // Switch off led
-        void deactivate();
+        // Set LED state
+        void setLedState(bool state);
     };
 
 }  // namespace gui

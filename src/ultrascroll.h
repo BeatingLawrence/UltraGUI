@@ -6,8 +6,8 @@
 #include <QVector>
 #include <QWidget>
 
-#include "UltraGUI_global.h"
 #include "types.h"
+#include "ultragui_global.h"
 
 /*
  *  This class constructs and draws a scroll object

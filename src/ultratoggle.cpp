@@ -23,11 +23,18 @@ UltraToggle::UltraToggle(QWidget* parent)
 //=========================================================
 UltraToggle::~UltraToggle() { m_timer.stop(); }
 //=========================================================
+void UltraToggle::setState(bool state) { forceState(state); }
+//=========================================================
 void UltraToggle::_onTimerTick()
 {
     if (isActive())
     {
-        if (m_slideAnimation == m_animationMax)
+        if (!isVisible())
+        {
+            m_timer.stop();
+            m_slideAnimation = m_animationMax;
+        }
+        else if (m_slideAnimation == m_animationMax)
             m_timer.stop();
         else
         {
@@ -38,7 +45,12 @@ void UltraToggle::_onTimerTick()
     }
     else
     {
-        if (m_slideAnimation == 0)
+        if (!isVisible())
+        {
+            m_timer.stop();
+            m_slideAnimation = 0;
+        }
+        else if (m_slideAnimation == 0)
             m_timer.stop();
         else
         {
@@ -75,20 +87,4 @@ void UltraToggle::resizeEvent(QResizeEvent* event)
 }
 //=========================================================
 void UltraToggle::stateChange(bool newState) { m_timer.start(); }
-//=========================================================
-void UltraToggle::setState(bool state, bool useAnimation)
-{
-    // m_state = state;
-
-    // if (useAnimation)
-    // {
-    //     m_timer.start();
-    //     _onTimerTick();
-    // }
-    // else
-    // {
-    //     m_slideAnimation = m_state ? m_animationMax : 0;
-    //     repaint();
-    // }
-}
 //=========================================================

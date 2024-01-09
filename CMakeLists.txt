@@ -21,7 +21,7 @@ cmake_minimum_required(VERSION 3.14)
                                           ||
 #]]#                                      V
 
-project(UltraGUI LANGUAGES CXX VERSION 1.0.0.1)
+project(UltraGUI LANGUAGES CXX VERSION 1.0.1.1)
 message(STATUS ${CMAKE_PROJECT_VERSION})
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -80,7 +80,8 @@ target_include_directories(TestAPP PUBLIC
     "../Dist/include"
 )
 
-target_link_libraries(TestAPP PRIVATE UltraGUI Qt6::Core Qt6::Widgets)
+target_link_directories(TestAPP PUBLIC "../Dist/lib")
+target_link_libraries(TestAPP PRIVATE UltraGUI-d Qt6::Core Qt6::Widgets)
 
 # ================================================================
 
@@ -105,6 +106,3 @@ elseif(UNIX)
     message(STATUS "On Linux/MACOSX system")
 
 endif()
-
-target_link_directories(TestAPP PUBLIC "../Dist/lib")
-target_link_libraries(TestAPP LINK_PUBLIC UltraGUI)

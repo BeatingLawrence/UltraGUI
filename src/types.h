@@ -1,10 +1,10 @@
-#ifndef TYPES_H
-#define TYPES_H
+#ifndef ULTRAGUI_TYPES_H
+#define ULTRAGUI_TYPES_H
 
 #include <QString>
 #include <QVector>
 
-#include "./UltraGUI_global.h"
+#include "./ultragui_global.h"
 
 namespace gui
 {
@@ -45,4 +45,4 @@ namespace gui
 
 }  // namespace gui
 
-#endif  // TYPES_H
+#endif  // ULTRAGUI_TYPES_H

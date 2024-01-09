@@ -4,8 +4,8 @@
 #include <QPainterPath>
 #include <QTimer>
 
-#include "UltraGUI_global.h"
 #include "buttonbehavior.h"
+#include "ultragui_global.h"
 
 namespace gui
 {
@@ -45,7 +45,7 @@ namespace gui
         inline void useHovering(bool use) { configureHovering(use); };
 
        public slots:
-        void setState(bool state, bool useAnimation = true);
+        void setState(bool state);
     };
 }  // namespace gui
 

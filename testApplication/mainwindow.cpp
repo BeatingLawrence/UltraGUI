@@ -48,6 +48,10 @@ void MainWindow::_sliderChange(uint32_t value)
 void MainWindow::testButtonClicked() { ui->buttonLogger->push("Test Button Clicked"); }
 void MainWindow::testButtonEnabled() { ui->buttonLogger->push("Test Button Enabled"); }
 void MainWindow::testButtonDisabled() { ui->buttonLogger->push("Test Button Disabled"); }
+void MainWindow::testToggleEnabled() { ui->buttonLogger->push("Test Toggle Enabled"); }
+void MainWindow::testToggleDisabled() { ui->buttonLogger->push("Test Toggle Disabled"); }
+void MainWindow::testToggleForceDisableClicked() { ui->testToggle->setState(false); }
+void MainWindow::testToggleForceEnableClicked() { ui->testToggle->setState(true); }
 //=========================================================
 void MainWindow::buttonTestToggleCBChange(int x) { ui->testPB->setToggleMode(x != 0); }
 //=========================================================
@@ -75,14 +79,19 @@ MainWindow::MainWindow(QWidget* parent)
     entry.data = ui->page_2;
     ui->selector->addEntry(entry);
     //
-
+    ui->testToggle->setToggleMode(true);
+    //
     connect(ui->testPB, SIGNAL(onClick()), this, SLOT(testButtonClicked()));
     connect(ui->testPB, SIGNAL(onEnable()), this, SLOT(testButtonEnabled()));
     connect(ui->testPB, SIGNAL(onDisable()), this, SLOT(testButtonDisabled()));
-
+    //
+    connect(ui->testToggle, SIGNAL(onEnable()), this, SLOT(testToggleEnabled()));
+    connect(ui->testToggle, SIGNAL(onDisable()), this, SLOT(testToggleDisabled()));
+    connect(ui->testToggleEnable, SIGNAL(clicked()), this, SLOT(testToggleForceEnableClicked()));
+    connect(ui->testToggleDisable, SIGNAL(clicked()), this, SLOT(testToggleForceDisableClicked()));
+    //
     connect(ui->buttonTestToggleCB, SIGNAL(stateChanged(int)), this, SLOT(buttonTestToggleCBChange(int)));
     connect(ui->buttonTestTouchCB, SIGNAL(stateChanged(int)), this, SLOT(buttonTestTouchCBChange(int)));
-
     //
     ui->slider->setTouchScreenMode(false);
     connect(ui->slider, SIGNAL(onChange(uint32_t)), this, SLOT(_sliderChange(uint32_t)));
