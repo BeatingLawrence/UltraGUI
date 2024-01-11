@@ -86,6 +86,8 @@ namespace gui
 
         virtual void hideEvent(QHideEvent* event) override;
 
+        virtual bool hitButton(const QPoint& pos) const override;
+
        public:
         explicit ButtonBehavior(QWidget* parent = nullptr);
 

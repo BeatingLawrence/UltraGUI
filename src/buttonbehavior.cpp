@@ -202,6 +202,8 @@ void ButtonBehavior::hideEvent(QHideEvent *event)
     QPushButton::hideEvent(event);
 }
 //=========================================================
+bool ButtonBehavior::hitButton(const QPoint &pos) const { return rect().contains(pos); }
+//=========================================================
 ButtonBehavior::ButtonBehavior(QWidget *parent)
     : QPushButton(parent),
       m_state(Inactive),
