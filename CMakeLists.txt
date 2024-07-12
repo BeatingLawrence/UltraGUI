@@ -35,7 +35,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_DEBUG_POSTFIX -d)
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  set(CMAKE_INSTALL_PREFIX "../Dist" CACHE PATH "..." FORCE)
+  set(CMAKE_INSTALL_PREFIX "../dist" CACHE PATH "..." FORCE)
 endif()
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
@@ -54,6 +54,12 @@ file(GLOB_RECURSE header_files CONFIGURE_DEPENDS
 qt_add_library(UltraGUI SHARED
     ${src_files}
     ${header_files}
+)
+
+set_property(   #delete install directory on clean
+        TARGET UltraGUI
+        APPEND
+        PROPERTY ADDITIONAL_CLEAN_FILES ${CMAKE_INSTALL_PREFIX}
 )
 
 target_link_libraries(UltraGUI PRIVATE Qt6::Core Qt6::Widgets)
@@ -76,12 +82,8 @@ add_executable(TestAPP EXCLUDE_FROM_ALL
   ${test_files}
 )
 
-target_include_directories(TestAPP PUBLIC
-    "../Dist/include"
-)
-
-target_link_directories(TestAPP PUBLIC "../Dist/lib")
-target_link_libraries(TestAPP PRIVATE UltraGUI-d Qt6::Core Qt6::Widgets)
+target_include_directories(TestAPP PRIVATE "src/")
+target_link_libraries(TestAPP LINK_PRIVATE UltraGUI Qt6::Core Qt6::Widgets)
 
 # ================================================================
 

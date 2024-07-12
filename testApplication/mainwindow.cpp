@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 
-#include <ultragui/ultragui.h>
+#include <ultragui.h>
 
 #include <QRandomGenerator>
 
@@ -17,7 +17,8 @@ void MainWindow::setDarkTheme(bool dt)
     {
         temp.setColor(QPalette::Button, QColor(50, 50, 50, 255));
         temp.setColor(QPalette::ButtonText, "white");
-        temp.setColor(QPalette::Disabled, QPalette::ButtonText, "gray");  // for the UltraSelector or UltraScroll
+        temp.setColor(QPalette::Disabled, QPalette::ButtonText,
+                      "gray");  // for the UltraSelector or UltraScroll
         temp.setColor(QPalette::Window, "black");
         temp.setColor(QPalette::WindowText, "white");
         temp.setColor(QPalette::Light, QColor(29, 255, 13));
@@ -70,7 +71,8 @@ MainWindow::MainWindow(QWidget* parent)
     QWidget::setWindowTitle(gui::UltraGui::version().text.c_str());
     //
     connect(ui->darkThemeToggle, SIGNAL(onChange(bool)), this, SLOT(setDarkTheme(bool)));
-    connect(ui->selector, SIGNAL(onClickForStacked(QWidget*)), ui->stackedWidget, SLOT(setCurrentWidget(QWidget*)));
+    connect(ui->selector, SIGNAL(onClickForStacked(QWidget*)), ui->stackedWidget,
+            SLOT(setCurrentWidget(QWidget*)));
     //
     UltraEntry entry = gui::UltraGui::createUltraEntry("Page 1", 0);
     entry.data       = ui->page_1;

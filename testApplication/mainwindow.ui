@@ -505,42 +505,42 @@
   <customwidget>
    <class>gui::UltraLogs</class>
    <extends>QWidget</extends>
-   <header>ultragui/ultralogs.h</header>
+   <header>ultralogs.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>gui::UltraSelector</class>
    <extends>QWidget</extends>
-   <header>ultragui/ultraselector.h</header>
+   <header>ultraselector.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>gui::UltraSlider</class>
    <extends>QWidget</extends>
-   <header>ultragui/ultraslider.h</header>
+   <header>ultraslider.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>gui::UltraLoadingBar</class>
    <extends>QWidget</extends>
-   <header>ultragui/ultraloadingbar.h</header>
+   <header>ultraloadingbar.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>gui::UltraScroll</class>
    <extends>QWidget</extends>
-   <header>ultragui/ultrascroll.h</header>
+   <header>ultrascroll.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>gui::UltraButton</class>
    <extends>QPushButton</extends>
-   <header>ultragui/ultrabutton.h</header>
+   <header>ultrabutton.h</header>
   </customwidget>
   <customwidget>
    <class>gui::UltraToggle</class>
    <extends>QPushButton</extends>
-   <header>ultragui/ultratoggle.h</header>
+   <header>ultratoggle.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
