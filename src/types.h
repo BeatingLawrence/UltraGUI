@@ -2,6 +2,7 @@
 #define ULTRAGUI_TYPES_H
 
 #include <QString>
+#include <QVariant>
 #include <QVector>
 
 #include "./ultragui_global.h"
@@ -30,6 +31,7 @@ namespace gui
         QString entryText;
         int32_t entryId;
         bool grayed;
+        QVariant variant;
         void* data;
     };
 

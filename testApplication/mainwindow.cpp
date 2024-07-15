@@ -58,6 +58,13 @@ void MainWindow::buttonTestToggleCBChange(int x) { ui->testPB->setToggleMode(x !
 //=========================================================
 void MainWindow::buttonTestTouchCBChange(int x) { ui->testPB->useHovering(x != 0); }
 //=========================================================
+void MainWindow::timerTick()
+{
+    static int i = 15;
+    ui->picker->addEntry(gui::UltraGui::createUltraEntry(QString("Entry%1").arg(i + 1), i));
+    i++;
+}
+//=========================================================
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent),
       ui(new Ui::MainWindow)
@@ -109,6 +116,29 @@ MainWindow::MainWindow(QWidget* parent)
     ui->scroll->addEntry(entry);
     ui->scroll->hideGrayedEntries();
     ui->scroll->setRounded(true);
+    //
+    //
+    ui->picker->addEntry(gui::UltraGui::createUltraEntry("Entry1", 0));
+    ui->picker->addEntry(gui::UltraGui::createUltraEntry("Entry2", 1));
+    ui->picker->addEntry(gui::UltraGui::createUltraEntry("Entry3", 2));
+    ui->picker->addEntry(gui::UltraGui::createUltraEntry("Entry4", 3));
+    ui->picker->addEntry(gui::UltraGui::createUltraEntry("Entry5", 4));
+    ui->picker->addEntry(gui::UltraGui::createUltraEntry("Entry6", 5));
+    ui->picker->addEntry(gui::UltraGui::createUltraEntry("Entry7", 6));
+    ui->picker->addEntry(gui::UltraGui::createUltraEntry("Entry8", 7));
+    ui->picker->addEntry(gui::UltraGui::createUltraEntry("Entry9", 8));
+    ui->picker->addEntry(gui::UltraGui::createUltraEntry("Entry10", 9));
+    ui->picker->addEntry(gui::UltraGui::createUltraEntry("Entry11", 10));
+    ui->picker->addEntry(gui::UltraGui::createUltraEntry("Entry12", 11));
+    ui->picker->addEntry(gui::UltraGui::createUltraEntry("Entry13", 12));
+    ui->picker->addEntry(gui::UltraGui::createUltraEntry("Entry14", 13));
+    ui->picker->addEntry(gui::UltraGui::createUltraEntry("Entry15", 14));
+
+    connect(&m_timer, SIGNAL(timeout()), this, SLOT(timerTick()));
+
+    m_timer.setInterval(1000);
+    m_timer.setSingleShot(false);
+    m_timer.start();
 }
 //=========================================================
 MainWindow::~MainWindow() { delete ui; }

@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QTimer>
 
 QT_BEGIN_NAMESPACE
 namespace Ui
@@ -16,6 +17,8 @@ class MainWindow : public QMainWindow
 
    private:
     Ui::MainWindow* ui;
+
+    QTimer m_timer;
 
    private slots:
     void setDarkTheme(bool dt);
@@ -33,6 +36,8 @@ class MainWindow : public QMainWindow
 
     void buttonTestToggleCBChange(int);
     void buttonTestTouchCBChange(int);
+
+    void timerTick();
 
    public:
     MainWindow(QWidget* parent = nullptr);

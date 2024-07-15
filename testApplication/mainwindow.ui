@@ -173,7 +173,7 @@
        <item>
         <widget class="QStackedWidget" name="stackedWidget">
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="page_1">
           <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -492,6 +492,46 @@
             </size>
            </property>
           </widget>
+          <widget class="QLabel" name="title_7">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>380</y>
+             <width>381</width>
+             <height>30</height>
+            </rect>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>20</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>UltraPicker test dashboard</string>
+           </property>
+          </widget>
+          <widget class="gui::UltraPicker" name="picker" native="true">
+           <property name="geometry">
+            <rect>
+             <x>400</x>
+             <y>350</y>
+             <width>180</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>180</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>180</width>
+             <height>20</height>
+            </size>
+           </property>
+          </widget>
          </widget>
         </widget>
        </item>
@@ -503,21 +543,14 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>gui::UltraLogs</class>
-   <extends>QWidget</extends>
-   <header>ultralogs.h</header>
-   <container>1</container>
+   <class>gui::UltraButton</class>
+   <extends>QPushButton</extends>
+   <header>ultrabutton.h</header>
   </customwidget>
   <customwidget>
    <class>gui::UltraSelector</class>
    <extends>QWidget</extends>
    <header>ultraselector.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>gui::UltraSlider</class>
-   <extends>QWidget</extends>
-   <header>ultraslider.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -527,20 +560,33 @@
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>gui::UltraLogs</class>
+   <extends>QWidget</extends>
+   <header>ultralogs.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>gui::UltraSlider</class>
+   <extends>QWidget</extends>
+   <header>ultraslider.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>gui::UltraScroll</class>
    <extends>QWidget</extends>
    <header>ultrascroll.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>gui::UltraButton</class>
-   <extends>QPushButton</extends>
-   <header>ultrabutton.h</header>
-  </customwidget>
-  <customwidget>
    <class>gui::UltraToggle</class>
    <extends>QPushButton</extends>
    <header>ultratoggle.h</header>
+  </customwidget>
+  <customwidget>
+   <class>gui::UltraPicker</class>
+   <extends>QWidget</extends>
+   <header>ultrapicker.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>
