@@ -27,18 +27,18 @@ void UltraLed::paintEvent(QPaintEvent* event)
 
     if (m_active)
     {
-        painter.fillPath(path, palette().color(QPalette::Light));
+        painter.fillPath(path, palette().accent());
     }
     else
     {
-        painter.fillPath(path, palette().color(QPalette::Dark));
+        painter.fillPath(path, palette().base());
     }
 
     if (m_ledBorderThickness != 0)
     {
         QPainterPathStroker stroker(QPen(QColor(), m_ledBorderThickness * 2));
         QPainterPath ring = stroker.createStroke(path).intersected(path);
-        painter.fillPath(ring, palette().color(QPalette::WindowText));
+        painter.fillPath(ring, palette().windowText());
     }
 
     painter.end();

@@ -18,12 +18,12 @@ class MainWindow : public QMainWindow
    private:
     Ui::MainWindow* ui;
 
-    QTimer m_timer;
+    QTimer m_timer, m_timer2;
 
    private slots:
     void setDarkTheme(bool dt);
 
-    void _sliderChange(uint32_t value);
+    void _sliderChange(float value);
 
     void testButtonClicked();
     void testButtonEnabled();
@@ -38,6 +38,7 @@ class MainWindow : public QMainWindow
     void buttonTestTouchCBChange(int);
 
     void timerTick();
+    void timerTick2();
 
    public:
     MainWindow(QWidget* parent = nullptr);

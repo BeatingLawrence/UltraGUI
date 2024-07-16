@@ -50,16 +50,13 @@ void UltraLoadingDots::paintEvent(QPaintEvent* event)
 {
     (void)event;
 
-    if (!m_loading)
-    {
-        return;
-    }
+    if (!m_loading) return;
 
     QPainter painter(this);
     painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
     painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.setPen(QPen(palette().color(QPalette::WindowText)));
-    painter.setBrush(palette().color(QPalette::WindowText));
+    painter.setPen(QPen(palette().windowText().color()));
+    painter.setBrush(palette().windowText().color());
     QPointF center(width() / 2, height() / 2);  // center of the widget
     painter.translate(center);
 

@@ -4,6 +4,8 @@
 #include <QMouseEvent>
 #include <QPainter>
 
+#include "ultragui.h"
+
 using namespace gui;
 
 //=========================================================
@@ -11,17 +13,24 @@ void UltraPickerSelector::paintEvent(QPaintEvent* event)
 {
     (void)event;
     QPainter painter(this);
-    painter.fillRect(rect(), palette().base());
+
+    painter.save();
+    painter.setBrush(m_palette.base());
+    painter.setPen(QPen(m_palette.base().color()));
+    painter.drawRect(rect());
+    painter.restore();
 
     QRect r(0, 0, width(), m_step);
-
     int offset = m_offset % m_step;
+
     painter.save();
     painter.translate(QPoint(0, -offset));
+    painter.setPen(QPen(m_palette.text(), 1));
 
     for (int i = m_offset / m_step; i < m_entries->size(); i++)
     {
-        if (r.translated(QPoint(0, -offset)).contains(m_cursor)) painter.fillRect(r, palette().light());
+        if (r.translated(QPoint(0, -offset)).contains(m_cursor))
+            painter.fillRect(r, UltraGui::faded(m_palette.accent().color()));
 
         painter.drawText(r, Qt::AlignVCenter | Qt::AlignLeft, (*m_entries)[i].entryText);
         r.translate(0, m_step);
@@ -30,6 +39,7 @@ void UltraPickerSelector::paintEvent(QPaintEvent* event)
     }
 
     painter.restore();
+    QColor color(m_palette.accent().color());
 
     if (m_newEntryAnimTimer.isActive())
     {
@@ -39,8 +49,10 @@ void UltraPickerSelector::paintEvent(QPaintEvent* event)
         animation.moveBottom(height());
 
         QLinearGradient gradient(animation.topLeft(), animation.bottomLeft());
-        gradient.setColorAt(0, QColor(0, 255, 0, 0));
-        gradient.setColorAt(1, QColor(0, 255, 0, m_newEntryAnimation * 5));
+        color.setAlpha(0);
+        gradient.setColorAt(0, color);
+        color.setAlpha(m_newEntryAnimation * 5);
+        gradient.setColorAt(1, color);
         painter.fillRect(animation, QBrush(gradient));
     }
 }
@@ -96,32 +108,28 @@ QRect UltraPickerSelector::_cappedToScreen(const QRect& r)
     return ret;
 }
 //=========================================================
-QColor UltraPickerSelector::_randomColor()
-{
-    return QColor(m_generator.bounded(0, 256), m_generator.bounded(0, 256), m_generator.bounded(0, 256), 100);
-}
-//=========================================================
-int UltraPickerSelector::ptToPx(int pt)
-{
-    return (int)((double)pt / 72.0f * QApplication::screenAt(pos())->physicalDotsPerInch());
-}
-//=========================================================
-void UltraPickerSelector::incOffset(int x)
+void UltraPickerSelector::incOffset(float x)
 {
     int max = maxOffset();
+    x       = ceil(x);
 
     if (m_offset + x > max)
-        m_offset = max;
+    {
+        m_offset       = max;
+        m_snapToBottom = true;  // snap
+    }
     else
         m_offset += x;
 }
 //=========================================================
-void UltraPickerSelector::decOffset(int x)
+void UltraPickerSelector::decOffset(float x)
 {
     if (m_offset - x < 0)
         m_offset = 0;
     else
         m_offset -= x;
+
+    m_snapToBottom = false;  // unsnap
 }
 //=========================================================
 int UltraPickerSelector::maxOffset() { return (m_entries->size() * m_step) - height(); }
@@ -133,6 +141,9 @@ void UltraPickerSelector::_onTimerTick()
     else
         m_newEntryAnimTimer.stop();
 
+    if (m_snapToBottom)
+        if (m_offset < maxOffset()) incOffset((float)m_step / 25.0f);
+
     repaint();
 }
 //=========================================================
@@ -142,9 +153,10 @@ UltraPickerSelector::UltraPickerSelector(QList<UltraEntry>* list, QWidget* paren
       m_maxLines(20),
       m_step(0),
       m_offset(0),
-      m_generator(),
       m_newEntryAnimTimer(),
-      m_newEntryAnimation(0)
+      m_newEntryAnimation(0),
+      m_snapToBottom(false),
+      m_palette()
 {
     m_newEntryAnimTimer.setInterval(10);
     m_newEntryAnimTimer.setSingleShot(false);
@@ -163,7 +175,8 @@ void UltraPickerSelector::move_resize(QRect r)
     move(r.topLeft());
     resize(r.size());
 
-    m_offset = 0;
+    m_offset       = 0;
+    m_snapToBottom = false;
 }
 //=========================================================
 void UltraPickerSelector::setMaxLines(uint32_t lines) { m_maxLines = lines; }
@@ -174,6 +187,12 @@ void UltraPickerSelector::newEntry()
 
     m_newEntryAnimation = 25;
     m_newEntryAnimTimer.start();
+}
+//=========================================================
+void UltraPickerSelector::set_palette(const QPalette& p)
+{
+    m_palette = p;
+    update();
 }
 //=========================================================
 void UltraPicker::_updateSelectorPos()
@@ -202,7 +221,7 @@ void UltraPicker::paintEvent(QPaintEvent* event)
 
     auto p = painter.pen();
     p.setWidth(2);
-    p.setColor(palette().light().color());
+    p.setColor(palette().accent().color());
     painter.setPen(p);
 
     if (m_open) painter.setBrush(p.color());
@@ -224,7 +243,11 @@ void UltraPicker::resizeEvent(QResizeEvent* event)
 //=========================================================
 void UltraPicker::changeEvent(QEvent* event)
 {
-    if (event->type() == QEvent::FontChange) m_selector.setFont(font());
+    if (event->type() == QEvent::FontChange)
+        m_selector.setFont(font());
+    else if (event->type() == QEvent::PaletteChange)
+        m_selector.set_palette(palette());
+
     QWidget::changeEvent(event);
 }
 //=========================================================

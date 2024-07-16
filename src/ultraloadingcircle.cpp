@@ -9,7 +9,7 @@ using namespace gui;
 //=========================================================
 void UltraLoadingCircle::_adaptColors()
 {
-    QColor tempColor   = palette().color(QPalette::WindowText);
+    QColor tempColor   = palette().windowText().color();
     QImage defaultIcon = m_pixmap.toImage();
 
     for (int y = 0; y < defaultIcon.height(); y++)

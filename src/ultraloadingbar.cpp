@@ -33,15 +33,9 @@ void UltraLoadingBar::setProgressBar(int status)
 {
     m_setPoint = (uint32_t)status;
 
-    if (m_setPoint > 1000)
-    {
-        m_setPoint = 1000;
-    }
+    if (m_setPoint > 1000) m_setPoint = 1000;
 
-    if (!m_timer.isActive())
-    {
-        m_timer.start();
-    }
+    if (!m_timer.isActive()) m_timer.start();
 }
 //=========================================================
 void UltraLoadingBar::setProgressBarToZero()
@@ -121,7 +115,7 @@ void UltraLoadingBar::paintEvent(QPaintEvent* event)
             background.addRect(QRect(0, 0, width(), height()));
         }
 
-        painter.fillPath(background, QBrush(palette().color(QPalette::Dark)));
+        painter.fillPath(background, QBrush(palette().base()));
     }
 
     if (m_pixels != 0)
@@ -139,7 +133,7 @@ void UltraLoadingBar::paintEvent(QPaintEvent* event)
             bar.addRect(QRect(0, 0, m_pixels, height()));
         }
 
-        painter.fillPath(bar, QBrush(palette().color(QPalette::Light)));
+        painter.fillPath(bar, QBrush(palette().accent()));
     }
 
     painter.end();

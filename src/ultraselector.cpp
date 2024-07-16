@@ -24,10 +24,7 @@ void UltraSelector::_computeAnimationBoundaries()
 {
     m_maxValue = m_entries.size() * 100;
 
-    if (m_animation > m_maxValue)
-    {
-        m_animation = m_maxValue;
-    }
+    if (m_animation > m_maxValue) m_animation = m_maxValue;
 }
 //=========================================================
 void UltraSelector::_tick()
@@ -36,17 +33,11 @@ void UltraSelector::_tick()
     float toSum              = (float)labs((int)targetAnimation - (int)m_animation) / 5.0f;
 
     if (targetAnimation > m_animation)
-    {
         m_animation += ceil(toSum);
-    }
     else if (targetAnimation < m_animation)
-    {
         m_animation -= ceil(toSum);
-    }
     else if (m_timer.isActive())
-    {
         m_timer.stop();
-    }
 
     repaint();
 }
@@ -55,10 +46,7 @@ void UltraSelector::paintEvent(QPaintEvent* event)
 {
     (void)event;
 
-    if (m_entries.empty())
-    {
-        return;
-    }
+    if (m_entries.empty()) return;
 
     QPainter painter(this);
     painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
@@ -75,7 +63,7 @@ void UltraSelector::paintEvent(QPaintEvent* event)
 
         if (!m_currentMouseCursor.isNull() && hoveringRect.contains(m_currentMouseCursor, true))
         {
-            QColor color = palette().color(QPalette::ButtonText);
+            QColor color = palette().buttonText().color();
             color.setAlpha(30);
             painter.setBrush(QBrush(color));
             painter.setPen(painterPen);
@@ -83,14 +71,16 @@ void UltraSelector::paintEvent(QPaintEvent* event)
             painter.setBrush(QBrush());
         }
 
-        painterPen.setColor(palette().color(m_entries[i].grayed ? QPalette::Disabled : QPalette::Normal, QPalette::ButtonText));
+        painterPen.setColor(palette().color(m_entries[i].grayed ? QPalette::Disabled : QPalette::Normal,
+                                            QPalette::ButtonText));
         painter.setPen(painterPen);
-        painter.drawText(hoveringRect.adjusted(10, 0, 0, 0), Qt::AlignVCenter | Qt::AlignLeft, m_entries[i].entryText);
+        painter.drawText(hoveringRect.adjusted(10, 0, 0, 0), Qt::AlignVCenter | Qt::AlignLeft,
+                         m_entries[i].entryText);
         hoveringRect.translate(0, m_sectionHeight);
     }
 
     painter.setPen(QPen(QBrush(), 1));
-    painter.setBrush(QBrush(palette().color(QPalette::Light)));
+    painter.setBrush(QBrush(palette().accent()));
     painter.drawRoundedRect(_animationToRect(), 2, 2);
     painter.end();
 }
@@ -136,10 +126,7 @@ void UltraSelector::mouseReleaseEvent(QMouseEvent* event)
                     m_timer.start();
                     emit onClick(el.entryId, el.data);
 
-                    if (el.data != nullptr)
-                    {
-                        emit onClickForStacked((QWidget*)el.data);
-                    }
+                    if (el.data != nullptr) emit onClickForStacked((QWidget*)el.data);
                 }
 
                 break;
@@ -186,18 +173,10 @@ void UltraSelector::addEntry(const UltraEntry& entry)
 //=========================================================
 bool UltraSelector::setEntries(const QVector<UltraEntry>& entries)
 {
-    if (entries.size() == 0)
-    {
-        return false;
-    }
+    if (entries.size() == 0) return false;
 
     for (auto& el : entries)
-    {
-        if (el.entryId == InvalidID)
-        {
-            return false;
-        }
-    }
+        if (el.entryId == InvalidID) return false;
 
     clearEntries();
     m_entries  = entries;
@@ -217,30 +196,22 @@ void UltraSelector::clearEntries()
 //=========================================================
 bool UltraSelector::setGrayed(int32_t entryID, bool grayed)
 {
-    if (entryID == InvalidID)
-    {
-        return false;
-    }
+    if (entryID == InvalidID) return false;
 
     for (auto& el : m_entries)
-    {
         if (el.entryId == entryID)
         {
             el.grayed = grayed;
             update();
             return true;
         }
-    }
 
     return false;
 }
 //=========================================================
 void UltraSelector::setAllGrayed(bool grayed)
 {
-    for (auto& el : m_entries)
-    {
-        el.grayed = grayed;
-    }
+    for (auto& el : m_entries) el.grayed = grayed;
 
     update();
 }

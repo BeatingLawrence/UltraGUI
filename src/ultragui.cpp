@@ -46,7 +46,10 @@ std::string UltraGui::substrFrom(const std::string& str, const std::string& toke
     return str.substr(found + token.size());
 }
 //=============================================================================
-UltraGui::dual UltraGui::split(const std::string& str, const std::string& token) { return {substrUntil(str, token), substrFrom(str, token)}; }
+UltraGui::dual UltraGui::split(const std::string& str, const std::string& token)
+{
+    return {substrUntil(str, token), substrFrom(str, token)};
+}
 //=============================================================================
 UltraEntry UltraGui::createUltraEntry(QString string, int32_t id)
 {
@@ -82,6 +85,13 @@ QColor UltraGui::transient(const QColor& first, const QColor& second, uint8_t se
     uint8_t B = ((float)selector * mB) + first.blue();
     uint8_t A = ((float)selector * mA) + first.alpha();
     return QColor(R, G, B, A);
+}
+//=============================================================================
+QColor UltraGui::faded(const QColor& color, float alpha)
+{
+    QColor ret(color);
+    ret.setAlphaF(alpha);
+    return ret;
 }
 //=============================================================================
 UltraGUIVersion UltraGui::version()

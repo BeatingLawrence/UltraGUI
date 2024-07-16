@@ -19,9 +19,10 @@ namespace gui
         int m_step;
         int m_offset;
         QPoint m_cursor;
-        QRandomGenerator m_generator;
         QTimer m_newEntryAnimTimer;
         int m_newEntryAnimation;
+        bool m_snapToBottom;
+        QPalette m_palette;
 
         virtual void paintEvent(QPaintEvent* event) override;
         virtual void mousePressEvent(QMouseEvent* event) override;
@@ -32,12 +33,8 @@ namespace gui
 
         QRect _cappedToScreen(const QRect& r);
 
-        QColor _randomColor();
-
-        int ptToPx(int pt);
-
-        void incOffset(int x);
-        void decOffset(int x);
+        void incOffset(float x);
+        void decOffset(float x);
 
         int maxOffset();
 
@@ -52,6 +49,8 @@ namespace gui
         void setMaxLines(uint32_t lines);
 
         void newEntry();
+
+        void set_palette(const QPalette& p);
 
        signals:
         void onSelect(uint32_t);

@@ -8,6 +8,17 @@
 
 using namespace gui;
 
+/*  Used QPalette roles:
+ *
+ *  -Button
+ *  -ButtonText
+ *  -WindowText
+ *  -Base: used for background of elements (except buttons)
+ *  -Text: used for text when base is used
+ *  -AlternateBase: as alternative to Base in certain cases (the knob and background of a toggle)
+ *  -Accent: used as accent color for all the components
+ */
+
 //=========================================================
 void MainWindow::setDarkTheme(bool dt)
 {
@@ -15,36 +26,37 @@ void MainWindow::setDarkTheme(bool dt)
 
     if (dt)
     {
-        temp.setColor(QPalette::Button, QColor(50, 50, 50, 255));
-        temp.setColor(QPalette::ButtonText, "white");
-        temp.setColor(QPalette::Disabled, QPalette::ButtonText,
-                      "gray");  // for the UltraSelector or UltraScroll
-        temp.setColor(QPalette::Window, "black");
-        temp.setColor(QPalette::WindowText, "white");
-        temp.setColor(QPalette::Light, QColor(29, 255, 13));
-        temp.setColor(QPalette::Midlight, QColor(9, 63, 5));
-        temp.setColor(QPalette::Dark, QColor(66, 66, 66));
+        // UltraGUI:
+        temp.setColor(QPalette::Button, QColor(0x1e1e1e));
+        temp.setColor(QPalette::ButtonText, QColor(0xffffff));
+        temp.setColor(QPalette::Disabled, QPalette::ButtonText, "gray");
+        temp.setColor(QPalette::WindowText, QColor(0xffffff));
+        temp.setColor(QPalette::Base, QColor(0x3e3e3e));
+        temp.setColor(QPalette::Text, QColor(0xffffff));
+        temp.setColor(QPalette::AlternateBase, QColor(0x5e5e5e));
+
+        // Other:
+        temp.setColor(QPalette::Window, QColor(0x212121));
     }
     else
     {
-        temp.setColor(QPalette::Button, QColor("white").darker(110));
-        temp.setColor(QPalette::ButtonText, "black");
+        // UltraGUI:
+        temp.setColor(QPalette::Button, QColor(0xb3b3b3));
+        temp.setColor(QPalette::ButtonText, QColor(0x000000u));
         temp.setColor(QPalette::Disabled, QPalette::ButtonText, "gray");
-        temp.setColor(QPalette::Window, QColor(0xdedede));
-        temp.setColor(QPalette::WindowText, "black");
-        temp.setColor(QPalette::Light, QColor(13, 85, 255));
-        temp.setColor(QPalette::Midlight, QColor(170, 196, 255));
-        temp.setColor(QPalette::Dark, QColor(190, 190, 190));
+        temp.setColor(QPalette::WindowText, QColor(0x000000u));
+        temp.setColor(QPalette::Base, QColor(0xa3a3a3));
+        temp.setColor(QPalette::Text, QColor(0x000000u));
+        temp.setColor(QPalette::AlternateBase, QColor(0x424242));  // darker than base
+
+        // Other:
+        temp.setColor(QPalette::Window, QColor(0xd1d1d1));
     }
 
     setPalette(temp);
 }
 //=========================================================
-void MainWindow::_sliderChange(uint32_t value)
-{
-    ui->sliderLabel->setText(QString("%1").arg(value));
-    ui->loadingBar->setProgressBar(value * 10);
-}
+void MainWindow::_sliderChange(float value) { ui->sliderLabel->setText(QString("%1").arg(value)); }
 //=========================================================
 void MainWindow::testButtonClicked() { ui->buttonLogger->push("Test Button Clicked"); }
 void MainWindow::testButtonEnabled() { ui->buttonLogger->push("Test Button Enabled"); }
@@ -63,6 +75,15 @@ void MainWindow::timerTick()
     static int i = 15;
     ui->picker->addEntry(gui::UltraGui::createUltraEntry(QString("Entry%1").arg(i + 1), i));
     i++;
+}
+//=========================================================
+void MainWindow::timerTick2()
+{
+    static int angle = 0;
+    ui->plotter->add(qSin(qDegreesToRadians((float)angle)));
+
+    angle += 10;
+    if (angle >= 360) angle = 0;
 }
 //=========================================================
 MainWindow::MainWindow(QWidget* parent)
@@ -84,9 +105,15 @@ MainWindow::MainWindow(QWidget* parent)
     UltraEntry entry = gui::UltraGui::createUltraEntry("Page 1", 0);
     entry.data       = ui->page_1;
     ui->selector->addEntry(entry);
+
     entry      = gui::UltraGui::createUltraEntry("Page 2", 1);
     entry.data = ui->page_2;
     ui->selector->addEntry(entry);
+
+    entry      = gui::UltraGui::createUltraEntry("Page 3", 2);
+    entry.data = ui->page_3;
+    ui->selector->addEntry(entry);
+
     //
     ui->testToggle->setToggleMode(true);
     //
@@ -102,8 +129,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->buttonTestToggleCB, SIGNAL(stateChanged(int)), this, SLOT(buttonTestToggleCBChange(int)));
     connect(ui->buttonTestTouchCB, SIGNAL(stateChanged(int)), this, SLOT(buttonTestTouchCBChange(int)));
     //
-    ui->slider->setTouchScreenMode(false);
-    connect(ui->slider, SIGNAL(onChange(uint32_t)), this, SLOT(_sliderChange(uint32_t)));
+    connect(ui->slider, SIGNAL(onChange(float)), this, SLOT(_sliderChange(float)));
     //
     ui->loadingBar->setRoundedBar();
     //
@@ -116,6 +142,11 @@ MainWindow::MainWindow(QWidget* parent)
     ui->scroll->addEntry(entry);
     ui->scroll->hideGrayedEntries();
     ui->scroll->setRounded(true);
+    //
+
+    ui->plotter->setHorizontalScale(5.0f, 0.01f, 0.5f);
+    ui->plotter->setVerticalScale(1.0f, 0.5f);
+    ui->plotter->setNotchDuration(1.0f);
     //
     //
     ui->picker->addEntry(gui::UltraGui::createUltraEntry("Entry1", 0));
@@ -135,10 +166,15 @@ MainWindow::MainWindow(QWidget* parent)
     ui->picker->addEntry(gui::UltraGui::createUltraEntry("Entry15", 14));
 
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(timerTick()));
+    connect(&m_timer2, SIGNAL(timeout()), this, SLOT(timerTick2()));
 
     m_timer.setInterval(1000);
     m_timer.setSingleShot(false);
     m_timer.start();
+
+    m_timer2.setInterval(100);
+    m_timer2.setSingleShot(false);
+    m_timer2.start();
 }
 //=========================================================
 MainWindow::~MainWindow() { delete ui; }

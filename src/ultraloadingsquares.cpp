@@ -59,9 +59,7 @@ void UltraLoadingSquares::setLoading(bool state)
         }
     }
     else if (m_loading && !state)
-    {
         m_timer.stop();
-    }
 
     m_loading = state;
 }
@@ -89,26 +87,14 @@ void UltraLoadingSquares::_increment(unsigned int& toIncrement, unsigned int end
 void UltraLoadingSquares::_onTimerTick()
 {
     if (m_animation <= m_bottomLeftCorner)
-    {
         _increment(m_animation, m_bottomLeftCorner);
-    }
     else if (m_animation > m_bottomLeftCorner && m_animation <= m_bottomRightCorner)
-    {
         _increment(m_animation, m_bottomRightCorner);
-    }
     else if (m_animation > m_bottomRightCorner && m_animation <= m_topRightCorner)
-    {
         _increment(m_animation, m_topRightCorner);
-    }
     else if (m_animation > m_topRightCorner && m_animation <= m_topLeftCorner)
-    {
         _increment(m_animation, m_topLeftCorner);
-    }
-
-    if (m_animation >= m_topLeftCorner)
-    {
-        m_animation = 0;
-    }
+    if (m_animation >= m_topLeftCorner) m_animation = 0;
 
     repaint();
 }
@@ -117,19 +103,15 @@ void UltraLoadingSquares::paintEvent(QPaintEvent* event)
 {
     (void)event;
 
-    if (!m_loading)
-    {
-        return;
-    }
+    if (!m_loading) return;
 
     QPainter painter(this);
     int xPos = 0;
     int yPos = 0;
 
     if (m_animation <= m_bottomLeftCorner)
-    {
         yPos = m_animation;
-    }
+
     else if (m_animation > m_bottomLeftCorner && m_animation <= m_bottomRightCorner)
     {
         xPos = m_animation - m_bottomLeftCorner;
@@ -141,12 +123,13 @@ void UltraLoadingSquares::paintEvent(QPaintEvent* event)
         yPos = m_topRightCorner - m_animation;
     }
     else if (m_animation > m_topRightCorner && m_animation <= m_topLeftCorner)
-    {
         xPos = m_topLeftCorner - m_animation;
-    }
 
-    painter.fillRect(QRect(QPoint(xPos, yPos), m_tinyRectSize), QBrush(palette().color(QPalette::Light)));
-    painter.fillRect(QRect(QPoint(width() - xPos - m_tinyRectSize.width(), height() - yPos - m_tinyRectSize.height()), m_tinyRectSize), QBrush(palette().color(QPalette::Light)));
+    painter.fillRect(QRect(QPoint(xPos, yPos), m_tinyRectSize), palette().accent());
+    painter.fillRect(
+        QRect(QPoint(width() - xPos - m_tinyRectSize.width(), height() - yPos - m_tinyRectSize.height()),
+              m_tinyRectSize),
+        palette().accent());
     painter.end();
 }
 //============================================================

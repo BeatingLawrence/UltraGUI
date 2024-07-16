@@ -16,22 +16,6 @@
  *  it increment or decrement depending on the rotation of the wheel.
  *  Clicking the slider in any point will make the cursor reaching that point.
  *
- *  Setting the touch screen mode to true will prevent the cursor from animating.
- *
- *  QPalette colors used by this component:
- *
- *      -QPalette::Base
- *          Used for the cursor
- *
- *      -QPalette::Light
- *          Used for filling the active area of the cursor
- *
- *      -QPalette::Dark
- *          Used for filling the inactive area of the cursor
- *
- *      -QPalette::Window
- *          Used for the background
- *
  */
 
 namespace gui
@@ -40,57 +24,32 @@ namespace gui
     {
         Q_OBJECT
        private:
-        int32_t m_slider;
-        int32_t m_zero;
-        int32_t m_max;
-        uint32_t m_pixelPos;
-        uint32_t m_pixelZeroPos;
-        uint32_t m_cursorDimension;
+        float m_slider, m_zero, m_max, m_min;
 
-        bool m_hovering;
-        bool m_touchScreenMode;
+        float _sliderToPixel(float slider);
+        float _pixelToSlider(float pixels);
+        float _cap(float val);
+        float _all_margins();
+        float _one_margin();
 
-        QTimer m_timer;
-
-        uint32_t _sliderToPixel(uint16_t slider);
-
-        void _updateCursorDimensionTick();
-
-       private slots:
-        void _tick();
+        void _incSlider(float x);
+        void _decSlider(float x);
 
        protected:
         virtual void paintEvent(QPaintEvent* event) override;
-
         virtual void mouseMoveEvent(QMouseEvent* event) override;
-
         virtual void mousePressEvent(QMouseEvent* event) override;
-
         virtual void wheelEvent(QWheelEvent* event) override;
-
-        virtual void leaveEvent(QEvent* event) override;
 
        public:
         explicit UltraSlider(QWidget* parent = nullptr);
 
-        // sets the zero position of the slider
-        inline void setZero(uint32_t zero)
+        inline void setRange(int32_t min, int32_t max, int32_t zero = 0)
         {
-            m_zero = zero;
-            update();
-        }
-
-        // sets the current slider position
-        inline void setSlider(uint32_t slider)
-        {
-            m_slider = slider;
-            repaint();
-        }
-
-        // sets the maximum value
-        inline void setMax(uint32_t max)
-        {
-            m_max = max;
+            m_min    = min;
+            m_max    = max;
+            m_zero   = zero;
+            m_slider = zero;
             update();
         }
 
@@ -98,22 +57,14 @@ namespace gui
         inline void zero()
         {
             m_slider = m_zero;
-
-            if (!m_timer.isActive())
-            {
-                m_timer.start();
-            }
+            emit onChange(m_slider);
         }
 
-        // sets the touchscreen mode status
-        inline void setTouchScreenMode(bool state)
-        {
-            m_touchScreenMode = state;
-            _updateCursorDimensionTick();
-        }
+       public slots:
+        void set(float value);
 
        signals:
-        void onChange(uint32_t value);
+        void onChange(float value);
     };
 }  // namespace gui
 

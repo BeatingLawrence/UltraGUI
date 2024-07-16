@@ -32,6 +32,9 @@ namespace gui
 
         static QColor transient(const QColor& first, const QColor& second, uint8_t selector);
 
+        // Return a faded color (with apha set half the value)
+        static QColor faded(const QColor& color, float alpha = 0.5f);
+
         static UltraGUIVersion version();
     };
 }  // namespace gui

@@ -69,11 +69,15 @@ void UltraToggle::paintEvent(QPaintEvent* event)
     QPainter painter(this);
     painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
     painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.setPen(QPen());
-    painter.fillPath(m_path, UltraGui::transient(palette().color(QPalette::Dark), palette().color(QPalette::Light), ((float)m_slideAnimation / (float)m_animationMax) * 255.0f));
-    painter.setBrush(palette().color(QPalette::Base));
+
+    painter.fillPath(m_path, UltraGui::transient(palette().base().color(), palette().accent().color(),
+                                                 ((float)m_slideAnimation / (float)m_animationMax) * 255.0f));
+
+    painter.setPen(QPen(Qt::PenStyle::NoPen));
+    painter.setBrush(palette().alternateBase());
     float cursorDimension = (float)height() / (isHovering() ? 3.0f : 4.0f);
-    painter.drawEllipse(QPointF((float)height() / 2.0f + (float)m_slideAnimation, (float)height() / 2.0f), cursorDimension, cursorDimension);
+    painter.drawEllipse(QPointF((float)height() / 2.0f + (float)m_slideAnimation, (float)height() / 2.0f),
+                        cursorDimension, cursorDimension);
 }
 //=========================================================
 void UltraToggle::resizeEvent(QResizeEvent* event)

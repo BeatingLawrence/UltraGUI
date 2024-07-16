@@ -52,9 +52,10 @@ void UltraButton::paintEvent(QPaintEvent* event)
     QColor fillColor;
 
     if (m_ledState)
-        fillColor = palette().color(QPalette::Light);
+        fillColor = palette().accent().color();
     else
-        fillColor = UltraGui::transient(palette().color(QPalette::Button), palette().color(QPalette::Midlight), m_hoveringAnimation);
+        fillColor = UltraGui::transient(palette().button().color(),
+                                        UltraGui::faded(palette().accent().color()), m_hoveringAnimation);
 
     //=====================================================DRAW
 
@@ -65,7 +66,7 @@ void UltraButton::paintEvent(QPaintEvent* event)
 
     painter.save();
     if (m_configuration.border)
-        painter.setPen(QPen(QBrush(palette().color(QPalette::ButtonText)), 1, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin));
+        painter.setPen(QPen(palette().buttonText(), 1, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin));
     else
         painter.setPen(QPen(Qt::NoPen));
 
@@ -77,11 +78,11 @@ void UltraButton::paintEvent(QPaintEvent* event)
 
     if (m_defaultIcon.isNull())
     {
-        painter.setPen(palette().color(QPalette::ButtonText));
+        painter.setPen(palette().buttonText().color());
 
         // left justified:
-        // painter.drawText(rect().adjusted(m_leftPadding, 0, 0, 0), Qt::AlignLeft | Qt::AlignVCenter, string);
-        // centered:
+        // painter.drawText(rect().adjusted(m_leftPadding, 0, 0, 0), Qt::AlignLeft | Qt::AlignVCenter,
+        // string); centered:
         painter.drawText(rect(), Qt::AlignHCenter | Qt::AlignVCenter, str);
     }
     else
@@ -91,7 +92,8 @@ void UltraButton::paintEvent(QPaintEvent* event)
         QRect target(xPos, yPos, m_defaultIcon.width(), m_defaultIcon.height());
 
         if (m_ledState)
-            painter.drawPixmap(target, m_activeIcon.isNull() ? m_defaultIcon : m_activeIcon, m_defaultIcon.rect());
+            painter.drawPixmap(target, m_activeIcon.isNull() ? m_defaultIcon : m_activeIcon,
+                               m_defaultIcon.rect());
         else
             painter.drawPixmap(target, m_defaultIcon, m_defaultIcon.rect());
     }
@@ -215,7 +217,7 @@ void UltraButton::_sum(uint8_t& value, uint8_t toSum, uint8_t max, bool subtract
 //=========================================================
 void UltraButton::_adaptIconsColor()
 {
-    QColor tempColor   = palette().color(QPalette::ButtonText);
+    QColor tempColor   = palette().buttonText().color();
     QImage defaultIcon = m_defaultIcon.toImage();
 
     for (int y = 0; y < defaultIcon.height(); y++)
