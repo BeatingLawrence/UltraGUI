@@ -24,9 +24,6 @@ namespace gui
         static dual split(const std::string& str, const std::string& token);
 
        public:
-        // Create a single UltraEntry with an ID and a string
-        static UltraEntry createUltraEntry(QString string, int32_t id = InvalidID);
-
         // Generate a vector of UltraEntry from a vector af strings. IDs are sequential.
         static QVector<UltraEntry> createUltraEntryVector(QVector<QString> strings);
 

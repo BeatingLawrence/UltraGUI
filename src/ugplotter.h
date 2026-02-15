@@ -1,6 +1,11 @@
 #ifndef GUI_UGPLOTTER_H
 #define GUI_UGPLOTTER_H
 
+// QPalette roles used by UGPlotter:
+// - Base: background (lightened when selected).
+// - Text: axes, ticks, and labels.
+// - Accent: plotted data curve.
+	
 #include <QWidget>
 
 namespace gui
@@ -31,7 +36,7 @@ namespace gui
 
         virtual void paintEvent(QPaintEvent* event) override;
 
-        void _drawFloat(QPainter& painter, float number, int height, int width, bool seconds = false);
+        void _drawFloat(QPainter& painter, float number, const QPointF& pos, bool alignRight = false);
 
        public slots:
         // zoom in on X axis

@@ -9,7 +9,7 @@
 #include "ultragui.h"
 
 #define LEFT_MARGIN 30
-#define RIGHT_MARGIN 30
+#define RIGHT_MARGIN 10
 #define TOP_MARGIN 10
 #define BUFFER_SIZE 10000
 
@@ -20,7 +20,7 @@ void UGPlotter::paintEvent(QPaintEvent* event)
 {
     (void)event;
     QPainter painter;
-    //
+
     // prepare
     painter.begin(this);
     int w = painter.device()->width();
@@ -31,95 +31,86 @@ void UGPlotter::paintEvent(QPaintEvent* event)
     QPoint bottom(LEFT_MARGIN, h - TOP_MARGIN);
     QPoint origin(LEFT_MARGIN, h / 2);
     QPoint right(w - RIGHT_MARGIN, h / 2);
-    int span         = right.x() - origin.x();                        // pixel count for the x axis
-    int range        = (h / 2) - TOP_MARGIN;                          // pixel count for half of y axis
-    float xStep      = (m_sample / m_horizontalRange) * (float)span;  // number of pixels for one sample
-    float xNotchStep = (m_notch / m_horizontalRange) * (float)span;   // number of pixels for one notch
-    float yStep      = ((float)range) / m_verticalScale;              // number of pixels for value unit
-    //
+
+    float span       = w - RIGHT_MARGIN - LEFT_MARGIN;         // pixel count for the x axis
+    float range      = ((float)h / 2.0f) - (float)TOP_MARGIN;  // pixel count for half of y axis
+    float xSamplePix = (m_sample / m_horizontalRange) * span;  // number of pixels for one sample
+    float xNotchPix  = (m_notch / m_horizontalRange) * span;   // number of pixels for one notch
+    float yStep      = range / m_verticalScale;                // number of pixels for value unit
+
     // draw
     painter.drawLine(top, bottom - QPoint(0, 1));
     painter.drawLine(origin, right);
     painter.translate(origin);
 
     // vertical scale notches
-    painter.drawLine(QPoint(-3, range), QPoint(3, range));
-    painter.drawLine(QPoint(-3, -range), QPoint(3, -range));
-    painter.drawLine(QPoint(-3, range / 2), QPoint(3, range / 2));
-    painter.drawLine(QPoint(-3, -range / 2), QPoint(3, -range / 2));
-    painter.drawLine(QPoint(-2, range / 4), QPoint(2, range / 4));
-    painter.drawLine(QPoint(-2, -range / 4), QPoint(2, -range / 4));
-    painter.drawLine(QPoint(-2, (range / 4) * 3), QPoint(2, (range / 4) * 3));
-    painter.drawLine(QPoint(-2, -(range / 4) * 3), QPoint(2, -(range / 4) * 3));
+    painter.drawLine(QPointF(-3.0f, range), QPointF(3.0f, range));
+    painter.drawLine(QPointF(-3.0f, -range), QPointF(3.0f, -range));
+    painter.drawLine(QPointF(-3.0f, range / 2.0f), QPointF(3.0f, range / 2.0f));
+    painter.drawLine(QPointF(-3.0f, -range / 2.0f), QPointF(3.0f, -range / 2.0f));
+    painter.drawLine(QPointF(-2.0f, range / 4.0f), QPointF(2.0f, range / 4.0f));
+    painter.drawLine(QPointF(-2.0f, -range / 4.0f), QPointF(2.0f, -range / 4.0f));
+    painter.drawLine(QPointF(-2.0f, (range / 4.0f) * 3.0f), QPointF(2.0f, (range / 4.0f) * 3.0f));
+    painter.drawLine(QPointF(-2.0f, -(range / 4.0f) * 3.0f), QPointF(2.0f, -(range / 4.0f) * 3.0f));
 
     // lines
     painter.save();
     painter.setPen(QPen(UltraGui::faded(palette().text().color(), 0.2f), 1));
-    painter.drawLine(QPoint(3, range), QPoint(span, range));
-    painter.drawLine(QPoint(3, -range), QPoint(span, -range));
-    painter.drawLine(QPoint(3, range / 2), QPoint(span, range / 2));
-    painter.drawLine(QPoint(3, -range / 2), QPoint(span, -range / 2));
-    painter.drawLine(QPoint(2, range / 4), QPoint(span, range / 4));
-    painter.drawLine(QPoint(2, -range / 4), QPoint(span, -range / 4));
-    painter.drawLine(QPoint(2, (range / 4) * 3), QPoint(span, (range / 4) * 3));
-    painter.drawLine(QPoint(2, -(range / 4) * 3), QPoint(span, -(range / 4) * 3));
+    painter.drawLine(QPointF(3.0f, range), QPointF(span, range));
+    painter.drawLine(QPointF(3.0f, -range), QPointF(span, -range));
+    painter.drawLine(QPointF(3.0f, range / 2.0f), QPointF(span, range / 2.0f));
+    painter.drawLine(QPointF(3.0f, -range / 2.0f), QPointF(span, -range / 2.0f));
+    painter.drawLine(QPointF(2.0f, range / 4.0f), QPointF(span, range / 4.0f));
+    painter.drawLine(QPointF(2.0f, -range / 4.0f), QPointF(span, -range / 4.0f));
+    painter.drawLine(QPointF(2.0f, (range / 4.0f) * 3.0f), QPointF(span, (range / 4.0f) * 3.0f));
+    painter.drawLine(QPointF(2.0f, -(range / 4.0f) * 3.0f), QPointF(span, -(range / 4.0f) * 3.0f));
     painter.restore();
-    //
+
     // time scale notches
     {
-        int biased                   = m_sampleCount - m_cursor;
-        float numberOfSamplePerNotch = m_notch / m_sample;
-        float translated             = fmod((float)biased, numberOfSamplePerNotch);
-        float n                      = (float)span - (translated * xStep);
-        float f = ((float)biased - fmod((float)biased, numberOfSamplePerNotch)) * m_sample;
+        uint32_t biased       = m_sampleCount - m_cursor;
+        float samplesPerNotch = m_notch / m_sample;
+        float translated      = fmod((float)biased, samplesPerNotch);
+        float n               = span - (translated * xSamplePix);
+        float f               = ((float)biased - translated) * m_sample;
 
         painter.setPen(QPen(palette().text(), 1));
 
-        for (int i = 0; i < 100; i++)  // max 100 notches
+        while (true)
         {
             painter.drawLine(QPointF(n, -2), QPointF(n, 2));
 
-            if (f > -0.001f) _drawFloat(painter, f, 10, n, false);
+            if (f > -0.001f) _drawFloat(painter, f, {n, 10.0f});
 
             f -= m_notch;
-            n -= xNotchStep;
+            n -= xNotchPix;
 
             if (n <= 0.0f) break;
         }
     }
-
-    // lines
-    painter.setPen(QPen(UltraGui::faded(palette().text().color(), 0.2f), 1));
-    painter.drawLine(QPoint(3, range), QPoint(span, range));
-    painter.drawLine(QPoint(3, -range), QPoint(span, -range));
-    painter.drawLine(QPoint(3, range / 2), QPoint(span, range / 2));
-    painter.drawLine(QPoint(3, -range / 2), QPoint(span, -range / 2));
-    painter.drawLine(QPoint(2, range / 4), QPoint(span, range / 4));
-    painter.drawLine(QPoint(2, -range / 4), QPoint(span, -range / 4));
-    painter.drawLine(QPoint(2, (range / 4) * 3), QPoint(span, (range / 4) * 3));
-    painter.drawLine(QPoint(2, -(range / 4) * 3), QPoint(span, -(range / 4) * 3));
 
     // text
     auto f = painter.font();
     f.setPixelSize(14);
     f.setBold(true);
     painter.setFont(f);
-    painter.drawText(QRect(QPoint(0, -range), QPoint(span, -(range / 4) * 3)), m_name,
+    painter.drawText(QRectF(QPointF(0, -range), QPointF(span, -(range / 4.0f) * 3.0f)), m_name,
                      QTextOption(Qt::AlignCenter));
+
     f.setPixelSize(8);
     painter.setFont(f);
+
     painter.setPen(QPen(palette().text(), 1));
-    _drawFloat(painter, m_verticalScale, range + 3, -30);
-    _drawFloat(painter, -m_verticalScale, -range + 3, -30);
-    _drawFloat(painter, m_verticalScale / 2, range / 2 + 3, -30);
-    _drawFloat(painter, -m_verticalScale / 2, -range / 2 + 3, -30);
-    _drawFloat(painter, m_verticalScale / 4, range / 4 + 3, -30);
-    _drawFloat(painter, -m_verticalScale / 4, -range / 4 + 3, -30);
-    _drawFloat(painter, (m_verticalScale / 4) * 3, (range / 4) * 3 + 3, -30);
-    _drawFloat(painter, -(m_verticalScale / 4) * 3, -(range / 4) * 3 + 3, -30);
+    _drawFloat(painter, -m_verticalScale, {-4.0f, range}, true);
+    _drawFloat(painter, m_verticalScale, {-4.0f, -range}, true);
+    _drawFloat(painter, -m_verticalScale / 2.0f, {-4.0f, range / 2.0f}, true);
+    _drawFloat(painter, m_verticalScale / 2.0f, {-4.0f, -range / 2.0f}, true);
+    _drawFloat(painter, -m_verticalScale / 4.0f, {-4.0f, range / 4.0f}, true);
+    _drawFloat(painter, m_verticalScale / 4.0f, {-4.0f, -range / 4.0f}, true);
+    _drawFloat(painter, -(m_verticalScale / 4.0f) * 3.0f, {-4.0f, (range / 4.0f) * 3.0f}, true);
+    _drawFloat(painter, (m_verticalScale / 4.0f) * 3.0f, {-4.0f, -(range / 4.0f) * 3.0f}, true);
 
     // data
-
     if (m_data.size() < 2)
     {
         painter.end();
@@ -136,21 +127,14 @@ void UGPlotter::paintEvent(QPaintEvent* event)
         for (uint32_t i = m_cursor; i < (uint32_t)m_data.size(); i++)
         {
             if (i == m_cursor)
-            {
                 dataPath.moveTo(0, yStep * m_data.at(i) * -1.0f);
-            }
             else
-            {
-                p += QPointF(xStep, 0);
-            }
+                p += QPointF(xSamplePix, 0);
 
             p.setY(yStep * m_data.at(i) * -1.0f);
             dataPath.lineTo(p);
 
-            if (p.x() > span)
-            {
-                break;
-            }
+            if (p.x() > span) break;
         }
     }
     else
@@ -160,14 +144,11 @@ void UGPlotter::paintEvent(QPaintEvent* event)
 
         for (uint32_t i = m_cursor + 1; i < (uint32_t)m_data.size(); i++)
         {
-            p -= QPointF(xStep, 0);
+            p -= QPointF(xSamplePix, 0);
             p.setY(yStep * m_data.at(i) * -1.0f);
             dataPath.lineTo(p);
 
-            if (p.x() <= 1)
-            {
-                break;
-            }
+            if (p.x() <= 1) break;
         }
     }
 
@@ -175,25 +156,31 @@ void UGPlotter::paintEvent(QPaintEvent* event)
     painter.end();
 }
 //===============================================
-void UGPlotter::_drawFloat(QPainter& painter, float number, int height, int width, bool seconds)
+void UGPlotter::_drawFloat(QPainter& painter, float number, const QPointF& pos, bool alignRight)
 {
     painter.save();
-    QRect r(width + 2, -height, 50, 10);
+    QRectF r(0, 0, 50.0f, 10.0f);
+
+    r.moveCenter(pos);
+
+    if (alignRight)
+        r.moveRight(pos.x());
+    else
+        r.moveLeft(pos.x());
+
     auto f = painter.font();
     f.setPixelSize(8);
     painter.setFont(f);
-    auto str = QString(seconds ? "%1s" : "%1").arg(number, 0, 'f', 2);
+    auto str = QString("%1").arg(number, 0, 'f', 2);
 
-    while (str.size() > 3)
-    {
-        if (str[str.size() - 2] == '.') break;
+    // while (str.size() > 3)
+    // {
+    //     if (str[str.size() - 2] == '.') break;
+    //     if (str[str.size() - 1] != '0') break;
+    //     str.remove(str.size() - 1, 1);
+    // }
 
-        if (str[str.size() - 1] != '0') break;
-
-        str.remove(str.size() - 1, 1);
-    }
-
-    painter.drawText(r, str, QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
+    painter.drawText(r, str, QTextOption((alignRight ? Qt::AlignRight : Qt::AlignLeft) | Qt::AlignVCenter));
     painter.restore();
 }
 //===============================================
@@ -229,7 +216,7 @@ void UGPlotter::scroll_L()
 //===============================================
 void UGPlotter::scroll_R()
 {
-    if (((int)m_cursor - (int)m_cursorStep) > 0)
+    if ((m_cursor - m_cursorStep) > 0)
         m_cursor -= m_cursorStep;
     else
         m_cursor = 0;
@@ -245,14 +232,14 @@ void UGPlotter::resetCursor()
 //===============================================
 UGPlotter::UGPlotter(QWidget* parent)
     : QWidget(parent),
-      m_verticalScale(0.0f),
-      m_verticalScaleZoomStep(0.0f),
-      m_horizontalRange(0.0f),
-      m_horizontalZoomStep(0.0f),
-      m_notch(0.0f),
-      m_sample(0.0f),
+      m_verticalScale(1.0f),
+      m_verticalScaleZoomStep(0.5f),
+      m_horizontalRange(10.0f),
+      m_horizontalZoomStep(1.0f),
+      m_notch(1.0f),
+      m_sample(0.2f),
       m_cursor(0),
-      m_cursorStep(0),
+      m_cursorStep(10),
       m_sampleCount(0),
       m_plotFromLeft(false),
       m_name(),

@@ -51,25 +51,12 @@ UltraGui::dual UltraGui::split(const std::string& str, const std::string& token)
     return {substrUntil(str, token), substrFrom(str, token)};
 }
 //=============================================================================
-UltraEntry UltraGui::createUltraEntry(QString string, int32_t id)
-{
-    UltraEntry entry;
-    entry.entryId   = id;
-    entry.entryText = string;
-    entry.grayed    = false;
-    entry.data      = nullptr;
-    return entry;
-}
-//=============================================================================
 QVector<UltraEntry> UltraGui::createUltraEntryVector(QVector<QString> strings)
 {
     QVector<UltraEntry> toReturn;
     int32_t i = 0;
 
-    for (auto& el : strings)
-    {
-        toReturn.push_back(createUltraEntry(el, i++));
-    }
+    for (auto& el : strings) toReturn.push_back({el.toStdString().c_str(), i++});
 
     return toReturn;
 }

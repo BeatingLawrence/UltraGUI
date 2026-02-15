@@ -20,91 +20,73 @@ cmake_minimum_required(VERSION 3.14)
                                         Version
                                           ||
 #]]#                                      V
+cmake_minimum_required(VERSION 3.16)
 
 project(UltraGUI LANGUAGES CXX VERSION 1.0.1.1)
-message(STATUS ${CMAKE_PROJECT_VERSION})
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-
 set(CMAKE_DEBUG_POSTFIX -d)
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  set(CMAKE_INSTALL_PREFIX "../dist" CACHE PATH "..." FORCE)
+    set(CMAKE_INSTALL_PREFIX "../dist" CACHE PATH "Install path" FORCE)
 endif()
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 
-# =======================UltraGUI library=========================
+# Qt 6.6 + recent macOS SDKs may expose legacy AGL through WrapOpenGL.
+# New SDKs do not provide AGL anymore, so strip only that framework.
+if(APPLE AND TARGET WrapOpenGL::WrapOpenGL)
+    get_target_property(_wrap_opengl_libs WrapOpenGL::WrapOpenGL INTERFACE_LINK_LIBRARIES)
+    if(_wrap_opengl_libs)
+        list(FILTER _wrap_opengl_libs EXCLUDE REGEX "AGL\\.framework")
+        set_target_properties(WrapOpenGL::WrapOpenGL PROPERTIES
+            INTERFACE_LINK_LIBRARIES "${_wrap_opengl_libs}")
+    endif()
+endif()
 
-file(GLOB_RECURSE src_files CONFIGURE_DEPENDS
-    "src/*.cpp"
+file(GLOB_RECURSE ULTRAGUI_SOURCES CONFIGURE_DEPENDS "src/*.cpp")
+file(GLOB_RECURSE ULTRAGUI_HEADERS CONFIGURE_DEPENDS "src/*.h")
+
+qt_add_library(UltraGUI SHARED)
+
+target_sources(UltraGUI PRIVATE
+    ${ULTRAGUI_SOURCES}
+    ${ULTRAGUI_HEADERS}
 )
 
-file(GLOB_RECURSE header_files CONFIGURE_DEPENDS
-    "src/*.h"
+target_include_directories(UltraGUI
+    PUBLIC
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>"
+        "$<INSTALL_INTERFACE:include/ultragui>"
 )
 
-qt_add_library(UltraGUI SHARED
-    ${src_files}
-    ${header_files}
+target_link_libraries(UltraGUI
+    PUBLIC
+        Qt6::Core
+        Qt6::Gui
+        Qt6::Widgets
 )
 
-set_property(   #delete install directory on clean
-        TARGET UltraGUI
-        APPEND
-        PROPERTY ADDITIONAL_CLEAN_FILES ${CMAKE_INSTALL_PREFIX}
+target_compile_definitions(UltraGUI
+    PRIVATE
+        ULTRAGUI_LIBRARY
+        LIBRARY_VERSION="${CMAKE_PROJECT_VERSION}"
+        LIBRARY_VERSION_TWEAK=${CMAKE_PROJECT_VERSION_TWEAK}
 )
 
-target_link_libraries(UltraGUI PRIVATE Qt6::Core Qt6::Widgets)
+if(MSVC)
+    target_compile_definitions(UltraGUI PRIVATE _CRT_SECURE_NO_WARNINGS)
+endif()
 
 set_target_properties(UltraGUI PROPERTIES PREFIX "lib" IMPORT_PREFIX "lib")
-
-target_compile_definitions(UltraGUI PRIVATE ULTRAGUI_LIBRARY PRIVATE _CRT_SECURE_NO_WARNINGS PRIVATE LIBRARY_VERSION="${CMAKE_PROJECT_VERSION}")
-target_compile_definitions(UltraGUI PRIVATE ULTRAGUI_LIBRARY PRIVATE _CRT_SECURE_NO_WARNINGS PRIVATE LIBRARY_VERSION_TWEAK=${CMAKE_PROJECT_VERSION_TWEAK})
 
 install(TARGETS UltraGUI DESTINATION lib)
 install(DIRECTORY src/ DESTINATION include/ultragui FILES_MATCHING PATTERN "*.h")
 
-# =======================test executable==========================
+file(GLOB_RECURSE TESTAPP_SOURCES CONFIGURE_DEPENDS "testApp/*")
 
-file(GLOB_RECURSE test_files CONFIGURE_DEPENDS
-    "testApplication/*"
-)
-
-add_executable(TestAPP EXCLUDE_FROM_ALL
-  ${test_files}
-)
-
-target_include_directories(TestAPP PRIVATE "src/")
-target_link_libraries(TestAPP LINK_PRIVATE UltraGUI Qt6::Core Qt6::Widgets)
-
-# ================================================================
-
-if(MSVC)
-
-    message(STATUS "On Windows system")
-
-    set_target_properties(UltraGUI test PROPERTIES
-        MSVC_RUNTIME_LIBRARY "MultiThreadedDebugDLL"
-    )
-
-    target_compile_definitions(UltraGUI PRIVATE WINDOWS_SYSTEM)
-
-elseif(UNIX)
-
-    if(APPLE)
-        target_compile_definitions(UltraGUI PRIVATE APPLE_SYSTEM)
-    else()
-        target_compile_definitions(UltraGUI PRIVATE LINUX_SYSTEM)
-    endif()
-
-    message(STATUS "On Linux/MACOSX system")
-
-endif()
+add_executable(TestAPP EXCLUDE_FROM_ALL ${TESTAPP_SOURCES})
+target_link_libraries(TestAPP PRIVATE UltraGUI)
