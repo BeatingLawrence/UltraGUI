@@ -48,8 +48,11 @@ void UGButton::paintEvent(QPaintEvent* event)
     if (m_ledState)
         fillColor = palette().accent().color();
     else
-        fillColor = UltraGui::transient(palette().button().color(),
-                                        UltraGui::faded(palette().accent().color()), m_hoveringAnimation);
+    {
+        const QColor idleColor = palette().button().color();
+        const QColor hoverColor = idleColor.lighter(115);
+        fillColor = UltraGui::transient(idleColor, hoverColor, m_hoveringAnimation);
+    }
 
     //=====================================================DRAW
 

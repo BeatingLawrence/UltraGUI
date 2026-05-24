@@ -27,7 +27,7 @@ namespace gui
         std::string text;
     };
 
-    static const int32_t ULTRAGUI_EXPORT InvalidID = -1;
+    static const int32_t InvalidID = -1;
 
     // UltraEntry structure
     struct ULTRAGUI_EXPORT UltraEntry

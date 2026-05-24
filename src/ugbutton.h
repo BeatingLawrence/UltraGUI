@@ -68,7 +68,8 @@ namespace gui
                 : animateHovering(true),
                   sync(true),
                   textFit(false),
-                  border(false)
+                  border(true),
+                  radius(0)
             {
             }
         } m_configuration;

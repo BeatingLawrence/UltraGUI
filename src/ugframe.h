@@ -2,12 +2,14 @@
 #define GUI_UGFRAME_H
 
 // QPalette roles used by UGFrame:
-// - Base: normal frame fill.
-// - Accent: fill color during blink.
+// - Midlight: idle frame border.
+// - Accent: blinking frame border.
 
 #include <cstdint>
 
+#include <QColor>
 #include <QFrame>
+#include <QString>
 #include <QTimer>
 
 namespace gui
@@ -23,6 +25,10 @@ namespace gui
 
         int m_blinksRemaining;
 
+        QString m_title;
+
+        Qt::Alignment m_titleAlignment;
+
         virtual void paintEvent(QPaintEvent* event) override;
 
        private slots:
@@ -32,6 +38,10 @@ namespace gui
         explicit UGFrame(QWidget* parent = nullptr);
 
         virtual ~UGFrame();
+
+        void setTitle(const QString& title, Qt::Alignment align = Qt::AlignHCenter);
+
+        void setBorderColor(const QColor& color);
 
         void blink(bool repeat = false);
         void blink(uint8_t blinks);

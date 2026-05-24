@@ -209,6 +209,7 @@ MainWindow::MainWindow(QWidget* parent)
 {
     ui->setupUi(this);
     setDarkTheme(false);
+    ui->frame->setTitle("UGFrame", Qt::AlignRight);
     ui->testPB->setBorderRadius(5);
     ui->testPB->drawBorder();
     ui->stackedWidget->setCurrentWidget(ui->page_1);

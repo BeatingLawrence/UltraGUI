@@ -46,6 +46,10 @@ namespace gui
         // Set the button as a toggle or a momentary button
         inline void setToggleMode(bool toggleMode) { configureToggle(toggleMode); }
 
+        // In automode the toggle updates its own state on click.
+        // With automode disabled the state is managed by application code.
+        inline void setAutoMode(bool automode) { configureAutoMode(automode); }
+
         // Set wether the hovering (mouse tracking) must be used or not
         inline void useHovering(bool use) { configureHovering(use); };
 

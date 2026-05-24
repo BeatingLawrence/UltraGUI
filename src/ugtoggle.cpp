@@ -17,6 +17,7 @@ UGToggle::UGToggle(QWidget* parent)
       m_timer(this),
       m_path()
 {
+    setToggleMode(true);
     m_timer.setInterval(20);
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(_onTimerTick()));
 }

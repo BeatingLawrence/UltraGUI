@@ -1,5 +1,7 @@
 #include "ugsegdisplay.h"
 
+#include <cmath>
+
 #include <QPainter>
 #include <QPainterPath>
 
@@ -74,7 +76,7 @@ void UGSegDisplay::paintEvent(QPaintEvent* event)
 //=========================================================
 bool UGSegDisplay::_isNegative()
 {
-    if (isnan(m_value)) return false;
+    if (std::isnan(m_value)) return false;
     return m_value < 0;
 }
 //=========================================================
