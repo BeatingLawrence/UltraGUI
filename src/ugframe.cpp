@@ -23,7 +23,8 @@ void UGFrame::paintEvent(QPaintEvent* event)
     const QFontMetrics metrics(font());
     const int titleHeight = hasTitle ? metrics.height() : 0;
     const int topInset = hasTitle ? std::max(1, (titleHeight / 2) + 1) : 1;
-    const QRect frameRect = rect().adjusted(1, topInset, -2, -2);
+    // Align a 1 px pen to pixel centers so opposite border gaps render symmetrically.
+    const QRectF frameRect = QRectF(rect()).adjusted(0.5, topInset + 0.5, -0.5, -0.5);
     constexpr int kRadius = 3;
     constexpr int kSideMargin = 10;
     constexpr int kGapPadding = 6;
@@ -51,7 +52,8 @@ void UGFrame::paintEvent(QPaintEvent* event)
                 const int maxX = frameRect.right() - kSideMargin - textWidth;
                 titleX = std::clamp(titleX, minX, maxX);
 
-                const int titleY = std::max(0, frameRect.top() - (titleHeight / 2));
+                const int titleY =
+                    static_cast<int>(std::max<qreal>(0.0, frameRect.top() - (titleHeight / 2.0)));
                 textRect = QRect(titleX, titleY, textWidth, titleHeight);
                 hasVisibleTitle = true;
             }

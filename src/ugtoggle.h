@@ -5,8 +5,11 @@
 // - Base: OFF state background.
 // - Accent: ON/transition background.
 // - AlternateBase: inner knob/slider.
+// - Text: OFF label on the Base background.
+// - HighlightedText: ON label on the Accent background.
 
 #include <QPainterPath>
+#include <QString>
 #include <QTimer>
 
 #include "buttonlogic.h"
@@ -24,6 +27,8 @@ namespace gui
         QTimer m_timer;
 
         QPainterPath m_path;
+        QString m_onText;
+        QString m_offText;
 
         void _mouseClicked();
 
@@ -52,6 +57,12 @@ namespace gui
 
         // Set wether the hovering (mouse tracking) must be used or not
         inline void useHovering(bool use) { configureHovering(use); };
+
+        // Set the label shown in the colored area while the toggle is on.
+        void setOnText(const QString& text);
+
+        // Set the label shown in the dark area while the toggle is off.
+        void setOffText(const QString& text);
 
        public slots:
         void setState(bool state);

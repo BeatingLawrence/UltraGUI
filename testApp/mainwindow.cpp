@@ -242,6 +242,8 @@ MainWindow::MainWindow(QWidget* parent)
 
     //
     ui->testToggle->setToggleMode(true);
+    ui->testToggle->setOnText("ON");
+    ui->testToggle->setOffText("OFF");
     //
     ui->segdisplay->setUnit("Volt");
     //

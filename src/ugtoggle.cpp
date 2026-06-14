@@ -2,6 +2,7 @@
 
 #include <math.h>
 
+#include <QFontMetrics>
 #include <QPainter>
 #include <QPainterPath>
 
@@ -15,7 +16,9 @@ UGToggle::UGToggle(QWidget* parent)
       m_slideAnimation(0),
       m_animationMax(0),
       m_timer(this),
-      m_path()
+      m_path(),
+      m_onText(),
+      m_offText()
 {
     setToggleMode(true);
     m_timer.setInterval(20);
@@ -25,6 +28,18 @@ UGToggle::UGToggle(QWidget* parent)
 UGToggle::~UGToggle() { m_timer.stop(); }
 //=========================================================
 void UGToggle::setState(bool state) { forceState(state); }
+//=========================================================
+void UGToggle::setOnText(const QString& text)
+{
+    m_onText = text;
+    update();
+}
+//=========================================================
+void UGToggle::setOffText(const QString& text)
+{
+    m_offText = text;
+    update();
+}
 //=========================================================
 void UGToggle::_onTimerTick()
 {
@@ -79,6 +94,34 @@ void UGToggle::paintEvent(QPaintEvent* event)
     float cursorDimension = (float)height() / (isHovering() ? 3.0f : 4.0f);
     painter.drawEllipse(QPointF((float)height() / 2.0f + (float)m_slideAnimation, (float)height() / 2.0f),
                         cursorDimension, cursorDimension);
+
+    const int textAreaWidth = width() - height();
+    if (textAreaWidth > 0)
+    {
+        const int offset = static_cast<int>(m_slideAnimation);
+        const QRect onTextArea(offset - textAreaWidth, 0, textAreaWidth, height());
+        const QRect offTextArea(height() + offset, 0, textAreaWidth, height());
+
+        painter.save();
+        painter.setClipPath(m_path);
+        painter.setFont(font());
+
+        if (!m_onText.isEmpty())
+        {
+            const QString displayed = QFontMetrics(font()).elidedText(m_onText, Qt::ElideRight, textAreaWidth);
+            painter.setPen(palette().highlightedText().color());
+            painter.drawText(onTextArea, Qt::AlignCenter, displayed);
+        }
+
+        if (!m_offText.isEmpty())
+        {
+            const QString displayed = QFontMetrics(font()).elidedText(m_offText, Qt::ElideRight, textAreaWidth);
+            painter.setPen(palette().text().color());
+            painter.drawText(offTextArea, Qt::AlignCenter, displayed);
+        }
+
+        painter.restore();
+    }
 }
 //=========================================================
 void UGToggle::resizeEvent(QResizeEvent* event)
