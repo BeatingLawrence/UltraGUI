@@ -10,6 +10,8 @@
 #include <QVector>
 #include <cstdint>
 
+#include "ultragui_global.h"
+
 namespace gui
 {
     class FloatCircBuf
@@ -31,7 +33,7 @@ namespace gui
         float& operator[](qsizetype index);
     };
 
-    class UGOscilloscope : public QWidget
+    class ULTRAGUI_EXPORT UGOscilloscope : public QWidget
     {
         Q_OBJECT
 

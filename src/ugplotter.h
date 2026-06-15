@@ -8,9 +8,11 @@
 	
 #include <QWidget>
 
+#include "ultragui_global.h"
+
 namespace gui
 {
-    class UGPlotter : public QWidget
+    class ULTRAGUI_EXPORT UGPlotter : public QWidget
     {
         Q_OBJECT
 

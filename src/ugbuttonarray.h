@@ -8,10 +8,11 @@
 #include <QWidget>
 
 #include "ugbutton.h"
+#include "ultragui_global.h"
 
 namespace gui
 {
-    class UGButtonArray : public QWidget
+    class ULTRAGUI_EXPORT UGButtonArray : public QWidget
     {
         Q_OBJECT
        private:

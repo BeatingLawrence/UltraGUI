@@ -10,9 +10,11 @@
 
 #include <QWidget>
 
+#include "ultragui_global.h"
+
 namespace gui
 {
-    class UGSegDisplay : public QWidget
+    class ULTRAGUI_EXPORT UGSegDisplay : public QWidget
     {
        private:
         float m_value;

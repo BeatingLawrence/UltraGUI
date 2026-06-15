@@ -3,9 +3,11 @@
 
 #include <QPushButton>
 
+#include "ultragui_global.h"
+
 namespace gui
 {
-    class ButtonLogic : public QPushButton
+    class ULTRAGUI_EXPORT ButtonLogic : public QPushButton
     {
         Q_OBJECT
 

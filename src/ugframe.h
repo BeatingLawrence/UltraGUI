@@ -12,9 +12,11 @@
 #include <QString>
 #include <QTimer>
 
+#include "ultragui_global.h"
+
 namespace gui
 {
-    class UGFrame : public QFrame
+    class ULTRAGUI_EXPORT UGFrame : public QFrame
     {
         Q_OBJECT
 
