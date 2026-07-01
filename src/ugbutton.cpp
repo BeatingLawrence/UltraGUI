@@ -2,8 +2,10 @@
 
 #include <QEvent>
 #include <QFontMetrics>
+#include <QIcon>
 #include <QPainter>
 #include <QPainterPathStroker>
+#include <QPixmap>
 #include <QResizeEvent>
 
 #include "ultragui.h"
@@ -71,8 +73,29 @@ void UGButton::paintEvent(QPaintEvent* event)
     painter.drawPath(m_frame);
     painter.restore();
 
-    painter.setPen(palette().buttonText().color());
-    painter.drawText(rect(), Qt::AlignHCenter | Qt::AlignVCenter, str);
+    const QIcon currentIcon = icon();
+    if (!currentIcon.isNull())
+    {
+        QSize targetSize = iconSize();
+        if (!targetSize.isValid() || targetSize.isEmpty())
+        {
+            const int side = qMax(1, qMin(width(), height()) - 4);
+            targetSize = QSize(side, side);
+        }
+
+        const QIcon::Mode mode = isEnabled() ? QIcon::Normal : QIcon::Disabled;
+        const QIcon::State state = m_ledState ? QIcon::On : QIcon::Off;
+        const QPixmap pixmap = currentIcon.pixmap(targetSize, mode, state);
+        const QSize drawSize = pixmap.deviceIndependentSize().toSize();
+        QRect iconRect(QPoint(0, 0), drawSize);
+        iconRect.moveCenter(rect().center());
+        painter.drawPixmap(iconRect.topLeft(), pixmap);
+    }
+    else
+    {
+        painter.setPen(palette().buttonText().color());
+        painter.drawText(rect(), Qt::AlignHCenter | Qt::AlignVCenter, str);
+    }
 }
 //=========================================================
 void UGButton::changeEvent(QEvent* event) { QPushButton::changeEvent(event); }
